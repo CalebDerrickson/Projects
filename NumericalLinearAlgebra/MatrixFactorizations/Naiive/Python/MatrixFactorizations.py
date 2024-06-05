@@ -4,14 +4,15 @@ Writing Matrix factorizations for the following decompositions:
         - (done) No pivoting
         - (done) partial 
         - rook pivoting
-    - QR
+        - sparse 
+    - QR (Givens)
     - SVD
     - Cholesky
 
 Also adding forward and back substitution
-Should also do in place
 """
 import numpy as np
+import math
 import typing
 
 def LU_no_pivoting(A: np.ndarray) -> typing.Tuple[np.ndarray, np.ndarray]:
@@ -76,6 +77,70 @@ def LU_partial_pivoting(A: np.ndarray) -> typing.Tuple[np.ndarray, np.ndarray, n
             U[j, :] = U[j, :] - L[j, k] * U[k, :]
 
     return L, U, P.astype(int)
+
+
+def QR_Givens(A: np.ndarray) -> typing.Tuple[np.ndarray, np.ndarray]:
+    """
+    Calculates the QR Decomposition of an n times n matrix using Givens Rotations.
+    The Square constraint on the input matrix is just for simplicity in implementing.
+    Using the Givens method for easing into paralellizability.
+    """
+    def givens_matrix(A: np.ndarray, n: int, i: int, j: int) -> np.ndarray:
+        """
+        Returns the Givens Matrix for the inputed indices i and j.
+        n is the size of the matrix A.
+        """
+        a = A[i-1][j]
+        b = A[i][j]
+        
+        G = np.eye(n)
+        
+        #Calculate c, s, r
+        if np.isclose(b, 0.0):
+            #c is approx 1, s is approx 0
+            return G
+    
+        r = np.hypot(a, b)
+        d = 1.0/r
+        c = np.abs(a) * d
+        s = -math.copysign(np.abs(d), a) * b
+        G[i][i] = c
+        G[j][j] = c
+        G[i][j] = s
+        G[j][i] = -s
+        return G
+    
+    # Continue funciton
+    n = max(A.shape)
+
+    if n == 0:
+            raise ValueError("The input matrix is empty.")
+        
+    if not np.issubdtype(A.dtype, np.number):
+        raise TypeError("The Input Matrix has non numeric values!")
+    
+    if np.isnan(A).any() or np.isinf(A).any():
+        raise ValueError("Nan or Inf entry found.")
+    
+    if n != A.shape[0] or n != A.shape[1]:
+        raise ValueError("The input matrix is not square.")   
+    
+    R = A.astype(np.double)
+    Q = np.eye(n)
+    for i in range(n):
+        for j in range(n):
+            if i > j:
+                G = givens_matrix(R, n, i, j)
+                Q = (G@Q).T
+                R = G@R
+    
+    # Flipping signs so that QR is unique
+    for i in range(n):
+        if R[i, i] < 0:
+            R[i, :] *= 1.0
+            Q[:, i] *= 1.0
+
+    return Q, R
 
 if __name__ == "__main__":
     print("Running the Library!")

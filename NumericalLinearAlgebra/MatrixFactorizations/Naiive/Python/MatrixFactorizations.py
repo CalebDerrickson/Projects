@@ -7,7 +7,7 @@ Writing Matrix factorizations for the following decompositions:
         - sparse 
     - (done for now) QR (Givens)
     - SVD
-    - Cholesky
+    - (done) Cholesky
 
 Also adding forward and back substitution
 """

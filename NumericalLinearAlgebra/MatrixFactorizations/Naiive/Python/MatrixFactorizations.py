@@ -102,8 +102,9 @@ def QR_Givens(A: np.ndarray) -> typing.Tuple[np.ndarray, np.ndarray]:
     
         r = np.hypot(a, b)
         d = 1.0/r
-        c = np.abs(a) * d
-        s = -math.copysign(np.abs(d), a) * b
+        c = a * d
+        s = -b * d
+        
         G[i][i] = c
         G[j][j] = c
         G[i][j] = s

@@ -1,5 +1,9 @@
 # Test Script for Matrix Factorizations
 import test_class
+# begin temp
+import MatrixFactorizations
+import numpy as np
+# end temp
 import unittest
 
 
@@ -13,7 +17,7 @@ def test_function(t_class) :
     
 
 def main() -> int :
-    return test_function(test_class.TestLU_partial_pivoting)
+    return test_function(test_class.TestQR_givens)
 
 if __name__ == "__main__":
     exit_code = main()

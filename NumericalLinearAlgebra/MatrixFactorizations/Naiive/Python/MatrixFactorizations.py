@@ -5,7 +5,7 @@ Writing Matrix factorizations for the following decompositions:
         - (done) partial 
         - rook pivoting
         - sparse 
-    - QR (Givens)
+    - (done for now) QR (Givens)
     - SVD
     - Cholesky
 
@@ -142,6 +142,55 @@ def QR_Givens(A: np.ndarray) -> typing.Tuple[np.ndarray, np.ndarray]:
             Q[:, i] *= 1.0
 
     return Q, R
+
+
+def Chol(A: np.ndarray) -> np.ndarray:
+    """
+    Performs cholesky decomposition of the input matrix.
+    This is an implementation of the Cholesky–Banachiewicz algorithm.
+    """
+    n = max(A.shape)
+
+    if n == 0:
+            raise ValueError("The input matrix is empty.")
+        
+    if not np.issubdtype(A.dtype, np.number):
+        raise TypeError("The Input Matrix has non numeric values!")
+    
+    if np.isnan(A).any() or np.isinf(A).any():
+        raise ValueError("Nan or Inf entry found.")
+    
+    if n != A.shape[0] or n != A.shape[1]:
+        raise ValueError("The input matrix is not square.")   
+
+    L = np.eye(n)
+    D = np.zeros_like(A)
+
+    for i in range(n):
+        for j in range(i+1):
+            sum = 0.0
+            for k in range(j-1):
+                sum += L[j][k] * L[j][k] * D[k][k]
+            
+            if A[j][j] - sum < 0:
+                raise ValueError("The input matrix is not Postive Semi Definite!")
+            
+            D[j][j] = A[j][j] - sum
+            
+            if i == j:
+                L[i][j] = 1.0
+            else:
+                sum = 0
+                for k in range(j-1):
+                    sum += L[i][k] * L[j][k] * D[k][k]
+                
+                sum *= (1.0 / D[j][j])
+                L[i][j] = sum 
+
+    return L, D
+
+            
+
 
 if __name__ == "__main__":
     print("Running the Library!")

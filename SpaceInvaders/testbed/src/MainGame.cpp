@@ -60,7 +60,7 @@ void MainGame::shutdown()
 {
     _glWindow.shutdown(); 
     
-    
+    // Error: The GLFW library is not initialized ?
     glfwTerminate();
 
 }

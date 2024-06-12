@@ -55,6 +55,7 @@
     },
     "files.associations": {
         "*.cpp": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "memory": "cpp"
     }
 }

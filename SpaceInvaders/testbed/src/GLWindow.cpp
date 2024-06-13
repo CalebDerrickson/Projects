@@ -14,12 +14,10 @@ GLWindow::GLWindow(uint32_t width, uint32_t height, const char* title) :
 
 GLWindow::~GLWindow() 
 {
-    if (_window) {
-        glfwDestroyWindow(_window);
-    }
+    
 }
 
-state GLWindow::init()
+status GLWindow::init()
 {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -31,19 +29,19 @@ state GLWindow::init()
     if (!_window) {
         printf("Window failed to be created!\n");
         glfwTerminate();
-        return state::FAIL;
+        return status::FAIL;
     }
     glfwMakeContextCurrent(_window);
 
-    return state::SUCCESS;
+    return status::SUCCESS;
 }
 
-state GLWindow::shutdown()
+status GLWindow::shutdown()
 {
     if (_window) {
         glfwDestroyWindow(_window);
-        return state::SUCCESS;
+        return status::SUCCESS;
     }
 
-    return state::FAIL;
+    return status::FAIL;
 }

@@ -11,8 +11,8 @@ public:
     GLWindow(uint32_t width, uint32_t height, const char* title);
     ~GLWindow();
     
-    state init();
-    state shutdown();
+    status init();
+    status shutdown();
 
     uint32_t getWidth() const noexcept {return _width;}
     uint32_t getHeight() const noexcept {return _height;}

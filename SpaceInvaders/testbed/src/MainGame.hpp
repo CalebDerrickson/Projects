@@ -16,5 +16,6 @@ public:
 
 private:
     GLWindow _glWindow;
-    
+    struct state_ptr{Buffer* state_buffer;} state_ptr;    
 };
+

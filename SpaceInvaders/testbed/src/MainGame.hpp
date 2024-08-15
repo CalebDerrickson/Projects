@@ -18,5 +18,6 @@ private:
     GLWindow _glWindow;
     struct state_ptr{Buffer* state_buffer;} state_ptr;
     Game _game;
+    SpriteAnimation* _alien_animation;
 };
 

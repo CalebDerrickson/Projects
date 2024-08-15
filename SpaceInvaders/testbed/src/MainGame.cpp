@@ -1,7 +1,7 @@
 #include "MainGame.hpp"
 
 // PRIVATE DECLARATIONS
-void error_callback(int error, const char* description);
+
 
 // CLASS DEFINITIONS
 MainGame::MainGame(uint32_t width, uint32_t height, const char* title) :
@@ -9,8 +9,9 @@ MainGame::MainGame(uint32_t width, uint32_t height, const char* title) :
 {
     state_ptr.state_buffer = new Buffer();
     state_ptr.state_buffer->height = height;
-    state_ptr.state_buffer->height = width;
+    state_ptr.state_buffer->width = width;
     
+
 
 }
 
@@ -22,9 +23,6 @@ MainGame::~MainGame()
 
 void MainGame::init()
 {
-    glfwSetErrorCallback(error_callback);
-
-    if (glfwInit() == GLFW_FALSE) {printf("ERROR\n"); return;}
 
     // --Create Window
     if (_glWindow.init() == status::FAIL) {return;} 
@@ -47,7 +45,8 @@ void MainGame::init()
     const int height = state_ptr.state_buffer->height; 
 
     state_ptr.state_buffer->data = new uint32_t[width * height];
-    buffer_clear(state_ptr.state_buffer, 0);
+    uint32_t clear_color = rgb_to_uint32(0, 0, 0);
+    buffer_clear(state_ptr.state_buffer, clear_color);
 
     // Create texture for presenting buffer to OpenGL
     GLuint buffer_texture;
@@ -141,7 +140,25 @@ void MainGame::init()
     glBindVertexArray(fullscreen_triangle_vao); // Bind to vertex array 
     
 
+    // Game initialization
+    _game.width = width;
+    _game.height = height;
+    _game.num_aliens = 55;
+    _game.aliens = new Alien[_game.num_aliens];
+    _game.player.x = width / 2 - 5;
+    _game.player.y = height / 15;
+    _game.player.life = 3;
 
+    
+
+    // intialize alien locations
+    for (int y_i = 0; y_i < 5; y_i++) {
+        for (int x_i = 0; x_i < 11; x_i++) {
+            _game.aliens[y_i * 11 + x_i].x = 16 * x_i + 20;
+            _game.aliens[y_i * 11 + x_i].y = 17 * y_i + 128;
+        }
+    }
+    
 
 
 }
@@ -150,14 +167,26 @@ void MainGame::run()
 {
     // -Game Loop
     uint32_t clear_color = rgb_to_uint32(0, 128, 0);
-    Sprite sp;
-    create_sprite(sp);
+    Sprite alien_sprite;
+    Sprite player_sprite;
+    create_alien_sprite(alien_sprite);
+    create_player_sprite(player_sprite);
 
     while (!glfwWindowShouldClose(_glWindow.getWindow_ptr()))
     {
+
         buffer_clear(state_ptr.state_buffer, clear_color);
 
-        buffer_sprite_draw(state_ptr.state_buffer, sp, 112, 128, rgb_to_uint32(128, 0, 0));
+        // Draw aliens
+        for (size_t ai = 0; ai < _game.num_aliens; ai++) {
+            const Alien& alien = _game.aliens[ai];
+            buffer_sprite_draw(state_ptr.state_buffer, alien_sprite,
+            alien.x, alien.y, rgb_to_uint32(128, 0, 0));
+        }
+
+        // Draw player
+        buffer_sprite_draw(state_ptr.state_buffer, player_sprite, 
+        _game.player.x, _game.player.y, rgb_to_uint32(128, 0, 0));
 
         glTexSubImage2D(
             GL_TEXTURE_2D, 0, 0, 0,
@@ -170,6 +199,7 @@ void MainGame::run()
         glfwSwapBuffers(_glWindow.getWindow_ptr());
 
         glfwPollEvents();
+
     }
 }
 
@@ -182,11 +212,9 @@ void MainGame::shutdown()
     // Error: The GLFW library is not initialized ?
     glfwTerminate();
 
+    delete _game.aliens;
+
 }
 
 
 // PRIVATE DEFINITIONS
-void error_callback(int error, const char* description) 
-{
-    fprintf(stderr, "Error: %s\n", description);
-}

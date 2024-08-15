@@ -1,7 +1,7 @@
 #include "MainGame.hpp"
 
 int main() {
-    MainGame game(600, 800, "Space Invaders");
+    MainGame game(640, 480, "Space Invaders");
     game.init();
     game.run();
 

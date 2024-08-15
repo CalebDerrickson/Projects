@@ -34,6 +34,26 @@ struct Sprite
     uint8_t* data;
 };
 
+struct Alien 
+{
+    size_t x, y;
+    uint8_t type;
+};
+
+struct Player
+{
+    size_t x, y;
+    size_t life;
+};
+
+struct Game 
+{
+    size_t width, height;
+    size_t num_aliens;
+    Alien* aliens;
+    Player player;  
+};
+
 inline void buffer_clear(Buffer* buffer, uint32_t color) 
 {
     for (size_t i = 0; i < buffer->width * buffer->height; i++) {
@@ -91,7 +111,7 @@ inline void buffer_sprite_draw(
     }
 }
 
-inline void create_sprite(Sprite& sprite)
+inline void create_alien_sprite(Sprite& sprite)
 {
     // Make sprite
     sprite.width = 11;
@@ -107,4 +127,23 @@ inline void create_sprite(Sprite& sprite)
         1,0,1,0,0,0,0,0,1,0,1, // @.@.....@.@
         0,0,0,1,1,0,1,1,0,0,0  // ...@@.@@...
     };
+}
+
+
+
+inline void create_player_sprite(Sprite& sprite) {
+
+    sprite.width = 11;
+    sprite.height = 7;
+    sprite.data = new uint8_t [11 * 7] 
+    {
+        0,0,0,0,0,1,0,0,0,0,0, // .....@.....
+        0,0,0,0,1,1,1,0,0,0,0, // ....@@@....
+        0,0,0,0,1,1,1,0,0,0,0, // ....@@@....
+        0,1,1,1,1,1,1,1,1,1,0, // .@@@@@@@@@.
+        1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
+        1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
+        1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
+    };
+
 }

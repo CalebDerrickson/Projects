@@ -1,5 +1,10 @@
 #include "GLWindow.hpp"
 
+
+// PRIVATE DECLARATIONS
+void error_callback(int error, const char* description);
+
+
 GLWindow::GLWindow() :
     _width(800), _height(600), _title("TEMP")
 {
@@ -19,6 +24,11 @@ GLWindow::~GLWindow()
 
 status GLWindow::init()
 {
+
+    glfwSetErrorCallback(error_callback);
+
+    if (glfwInit() == GLFW_FALSE) {printf("ERROR\n"); return status::FAIL;}
+
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
@@ -44,4 +54,11 @@ status GLWindow::shutdown()
     }
 
     return status::FAIL;
+}
+
+
+// PRIVATE DEFINITIONS
+void error_callback(int error, const char* description) 
+{
+    fprintf(stderr, "Error: %s\n", description);
 }

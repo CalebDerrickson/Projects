@@ -27,52 +27,28 @@ MainApp::~MainApp()
 
 STATE MainApp::init()
 {
-    // Initialize the basic stuff, like glfw
-    BaseApp::init();
-    glfwInit();
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-
-    // Initialize the window
-    _window = glfwCreateWindow(_width, _height, _title, NULL, NULL);
-    if (_window == nullptr) {
-        std::cout<<"Could not create window!" << std::endl;
-        glfwTerminate();
+    // Initialize the basic stuff, like glfw and glad
+    // Also initializes _mainWindow
+    if (BaseApp::init() == STATE::ERROR) {
+        std::cout<<"Error in initialization"<<std::endl;
         return STATE::ERROR;
     }
-    
-    glfwMakeContextCurrent(_window);
-    // Might require the window to be instanciated
-    if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
-            std::cout<<"Failed to initialize glad!" << std::endl;
-            glfwTerminate();
-            return STATE::ERROR;
-        }
-
-
-    
-    glViewport(0, 0, 800, 600);
+    glViewport(0, 0, _width, _height);
 
     // Setting window update on resize
-    glfwSetFramebufferSizeCallback(_window, framebufferSizeCallback);
-
-
-
+    glfwSetFramebufferSizeCallback(_mainWindow, framebufferSizeCallback);
     return STATE::OKAY;
 }
 
 STATE MainApp::run()
 {
 
-    while (!glfwWindowShouldClose(_window)) {
-        processInput(_window);
+    while (!glfwWindowShouldClose(_mainWindow)) {
+        processInput(_mainWindow);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glfwSwapBuffers(_window);
+        glfwSwapBuffers(_mainWindow);
         glfwPollEvents();
     } 
 

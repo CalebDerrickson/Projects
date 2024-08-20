@@ -28,8 +28,8 @@ protected:
     uint32_t _height;
     const char* _title;
 
-    // For the moment it should be up to the derived classes to initialize the window.
-    GLFWwindow* _window = nullptr;
+    // glad requires a context window for initialization
+    GLFWwindow* _mainWindow = nullptr;
 
 private:
     static int _isInitialized; // Keep track of initialization 

@@ -7,10 +7,10 @@
 int main() {
 
     MainApp mainApp(800, 600, "test");
-    mainApp.init();
-    mainApp.run();
+    if (mainApp.init() != STATE::OKAY) return -1;
+    if (mainApp.run() != STATE::OKAY) return -1; 
 
-    mainApp.shutdown();
+    if (mainApp.shutdown() != STATE::OKAY) return -1;
 
     return 0;
 }

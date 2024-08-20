@@ -33,6 +33,22 @@ STATE BaseApp::init()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
+    // Initialize the window
+    _mainWindow = glfwCreateWindow(_width, _height, _title, NULL, NULL);
+    if (_mainWindow == nullptr) {
+        std::cout<<"Could not create window!" << std::endl;
+        glfwTerminate();
+        return STATE::ERROR;
+    }
+    
+    glfwMakeContextCurrent(_mainWindow);
+    // Might require the window to be instanciated
+    if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
+            std::cout<<"Failed to initialize glad!" << std::endl;
+            glfwTerminate();
+            return STATE::ERROR;
+    }
+
     _isInitialized = SIM_YES;
 //     std::cout<<"init"<<std::endl;
     return STATE::OKAY;

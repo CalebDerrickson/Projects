@@ -5,9 +5,9 @@
             "includePath": [
                 "${workspaceFolder}/testbed/src/**",
                 "${workspaceFolder}/dependencies/**",
-                "${workspaceFolder}/dependencies/",
-                "${workspaceFolder}/dependencies/glew/include",
-                "${workspaceFolder}/dependencies/glfw/include"
+                "${workspaceFolder}/dependencies/lib",
+                "${workspaceFolder}"
+                
             ],
             "defines": [
                 "_DEBUG",

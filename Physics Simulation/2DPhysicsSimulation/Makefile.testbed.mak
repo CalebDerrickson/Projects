@@ -1,17 +1,15 @@
+# Your existing variables here...
 DIR := $(subst /,\,${CURDIR})
 BUILD_DIR := bin
 OBJ_DIR := obj
 
-GLFW_PATH := dependencies/glfw
-GLEW_PATH := dependencies/glew
-GLEW_LIB_PATH := dependencies/glew/lib/Release/x64
-GLFW_LIB_PATH := dependencies/glfw/lib
+DEPENDENCIES_PATH := dependencies
 
 ASSEMBLY := testbed
 EXTENSION := .exe
 COMPILER_FLAGS := -g -MD -Werror=vla -Wno-missing-braces #-fPIC
-INCLUDE_FLAGS := -Itestbed\src -I$(GLFW_PATH)\include -I$(GLEW_PATH)\include
-LINKER_FLAGS := -g -L$(OBJ_DIR)\ -L$(BUILD_DIR)\ -L$(GLFW_LIB_PATH) -lglfw3 -L$(GLEW_LIB_PATH) -lglew32 -lgdi32 -lopengl32 #-Wl,-rpath,.
+INCLUDE_FLAGS := -Itestbed\src -I$(DEPENDENCIES_PATH)\include 
+LINKER_FLAGS := -g -L$(OBJ_DIR)\ -L$(BUILD_DIR)\ -L$(DEPENDENCIES_PATH)\lib -lglfw3 -lgdi32 -lopengl32 #-Wl,-rpath,.
 DEFINES :=
 
 # Make does not offer a recursive wildcard function, so here's one:
@@ -43,6 +41,11 @@ clean: # clean build directory
 	if exist $(BUILD_DIR)\$(ASSEMBLY)$(EXTENSION) del $(BUILD_DIR)\$(ASSEMBLY)$(EXTENSION)
 	rmdir /s /q $(OBJ_DIR)\$(ASSEMBLY)
 
+.PHONY: list_dependencies
+list_dependencies:
+	@echo Listing files in $(DEPENDENCIES_PATH)...
+	@dir $(DEPENDENCIES_PATH)\lib
+	
 $(OBJ_DIR)/%.cpp.o: %.cpp # compile .cpp to .cpp.o object
 	@echo   $<...
 	@g++ $< $(COMPILER_FLAGS) -c -o $@ $(DEFINES) $(INCLUDE_FLAGS)

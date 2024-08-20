@@ -15,9 +15,15 @@ DEFINES :=
 # Make does not offer a recursive wildcard function, so here's one:
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 
-SRC_FILES := $(call rwildcard,$(ASSEMBLY)/,*.cpp) # Get all .cpp files
+# Get all .cpp and .c files
+CPP_SRC_FILES := $(call rwildcard,$(ASSEMBLY)/,*.cpp)
+C_SRC_FILES := $(call rwildcard,$(ASSEMBLY)/,*.c)
+SRC_FILES := $(CPP_SRC_FILES) $(C_SRC_FILES)
+
+# Object files for both .cpp and .c files
+OBJ_FILES := $(CPP_SRC_FILES:%.cpp=$(OBJ_DIR)/%.cpp.o) $(C_SRC_FILES:%.c=$(OBJ_DIR)/%.c.o)
+
 DIRECTORIES := \$(ASSEMBLY)\src $(subst $(DIR),,$(shell dir $(ASSEMBLY)\src /S /AD /B | findstr /i src)) # Get all directories under src.
-OBJ_FILES := $(SRC_FILES:%=$(OBJ_DIR)/%.o) # Get all compiled .cpp.o objects for testbed
 
 all: scaffold compile link
 
@@ -33,7 +39,7 @@ link: scaffold $(OBJ_FILES) # link
 	@g++ $(OBJ_FILES) -o $(BUILD_DIR)/$(ASSEMBLY)$(EXTENSION) $(LINKER_FLAGS)
 
 .PHONY: compile
-compile: #compile .cpp files
+compile: #compile .cpp and .c files
 	@echo Compiling...
 
 .PHONY: clean
@@ -49,5 +55,9 @@ list_dependencies:
 $(OBJ_DIR)/%.cpp.o: %.cpp # compile .cpp to .cpp.o object
 	@echo   $<...
 	@g++ $< $(COMPILER_FLAGS) -c -o $@ $(DEFINES) $(INCLUDE_FLAGS)
+
+$(OBJ_DIR)/%.c.o: %.c # compile .c to .c.o object
+	@echo   $<...
+	@gcc $< $(COMPILER_FLAGS) -c -o $@ $(DEFINES) $(INCLUDE_FLAGS)
 
 -include $(OBJ_FILES:.o=.d)

@@ -1,4 +1,6 @@
 #include "MainApp.hpp"
+#include "../maths/vector_math.hpp"
+
 
 // *******************************
 //    PRIVATE METHOD DECLARATIONS 
@@ -37,6 +39,20 @@ STATE MainApp::init()
 
     // Setting window update on resize
     glfwSetFramebufferSizeCallback(_mainWindow, framebufferSizeCallback);
+    
+    // Test for math library and structuring of makefile
+    // TODO: Remove this
+    vec3<int> vec = {3, 2, 1};
+    vec3<int> temp = vec+=3;
+
+    std::cout<<"vec: " <<vec.x<<' '<<vec.y<<' '<<vec.z<<std::endl;
+    std::cout<<"temp: " <<temp.x<<' '<<temp.y<<' '<<temp.z<<std::endl;
+    
+    vec = temp - vec;
+    std::cout<<"vec: " <<vec.x<<' '<<vec.y<<' '<<vec.z<<std::endl;
+    
+
+
     return STATE::OKAY;
 }
 

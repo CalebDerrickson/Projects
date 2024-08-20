@@ -8,7 +8,7 @@ DEPENDENCIES_PATH := dependencies
 ASSEMBLY := testbed
 EXTENSION := .exe
 COMPILER_FLAGS := -g -MD -Werror=vla -Wno-missing-braces #-fPIC
-INCLUDE_FLAGS := -Itestbed\src -I$(DEPENDENCIES_PATH)\include 
+INCLUDE_FLAGS := -Itestbed\src -Itestbed\maths -I$(DEPENDENCIES_PATH)\include 
 LINKER_FLAGS := -g -L$(OBJ_DIR)\ -L$(BUILD_DIR)\ -L$(DEPENDENCIES_PATH)\lib -lglfw3 -lgdi32 -lopengl32 #-Wl,-rpath,.
 DEFINES :=
 
@@ -16,14 +16,14 @@ DEFINES :=
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 
 # Get all .cpp and .c files
-CPP_SRC_FILES := $(call rwildcard,$(ASSEMBLY)/,*.cpp)
-C_SRC_FILES := $(call rwildcard,$(ASSEMBLY)/,*.c)
+CPP_SRC_FILES := $(call rwildcard,$(ASSEMBLY)/,*.cpp) $(call rwildcard,maths/,*.cpp)
+C_SRC_FILES := $(call rwildcard,$(ASSEMBLY)/,*.c) $(call rwildcard,maths/,*.c)
 SRC_FILES := $(CPP_SRC_FILES) $(C_SRC_FILES)
 
 # Object files for both .cpp and .c files
 OBJ_FILES := $(CPP_SRC_FILES:%.cpp=$(OBJ_DIR)/%.cpp.o) $(C_SRC_FILES:%.c=$(OBJ_DIR)/%.c.o)
 
-DIRECTORIES := \$(ASSEMBLY)\src $(subst $(DIR),,$(shell dir $(ASSEMBLY)\src /S /AD /B | findstr /i src)) # Get all directories under src.
+DIRECTORIES := \$(ASSEMBLY)\src $(subst $(DIR),,$(shell dir $(ASSEMBLY)\src /S /AD /B | findstr /i src)) \$(ASSEMBLY)\maths $(subst $(DIR),,$(shell dir $(ASSEMBLY)\maths /S /AD /B | findstr /i maths)) # Get all directories under src and maths.
 
 all: scaffold compile link
 

@@ -74,10 +74,6 @@
         "command": "-workbench.action.focusLeftGroup"
     },
     {
-        "key": "ctrl+alt+right",
-        "command": "workbench.action.focusRightGroup"
-    },
-    {
         "key": "ctrl+k ctrl+right",
         "command": "-workbench.action.focusRightGroup"
     },
@@ -85,5 +81,11 @@
         "key": "ctrl+alt+c",
         "command": "workbench.action.tasks.runTask",
         "args": "Clean Everything"
+    },
+    {
+        "key": "ctrl+alt+right",
+        "command": "editor.action.selectHighlights",
+        "when": "editorTextFocus && !editorReadonly"
     }
+
 ]

@@ -1,5 +1,6 @@
 #include "MainApp.hpp"
 #include "../maths/vector_math.hpp"
+#include "../maths/matrix_math.hpp"
 
 
 // *******************************
@@ -40,18 +41,12 @@ STATE MainApp::init()
     // Setting window update on resize
     glfwSetFramebufferSizeCallback(_mainWindow, framebufferSizeCallback);
     
-    // Test for math library and structuring of makefile
-    // TODO: Remove this
-    vec3<int> vec = {3, 2, 1};
-    vec3<int> temp = vec+=3;
+    matrix::mat3<int> mat1(1);
+    matrix::mat3<int> mat2(2);
 
-    std::cout<<"vec: " <<vec.x<<' '<<vec.y<<' '<<vec.z<<std::endl;
-    std::cout<<"temp: " <<temp.x<<' '<<temp.y<<' '<<temp.z<<std::endl;
-    
-    vec = temp - vec;
-    std::cout<<"vec: " <<vec.x<<' '<<vec.y<<' '<<vec.z<<std::endl;
-    
+    matrix::mat3<int> mat3 = matrix::matmult(mat1, mat2);
 
+    matrix::print(mat3);
 
     return STATE::OKAY;
 }

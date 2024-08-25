@@ -28,18 +28,14 @@
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
-// To compile shaders
-// TODO: Refactor
-std::string loadShaderSrc(const char* filename);
-
 // *******************************
 //    CLASS METHOD DEFINITIONS
 // *******************************
 
 MainApp::MainApp(int width, int height, const char* title)
-    :   BaseApp(width, height, title)
+    :   BaseApp(width, height, title),
+        _ResourceManager()
 {
-
 
 }
 
@@ -65,104 +61,44 @@ STATE MainApp::init()
 
     // Setting window update on resize
     glfwSetFramebufferSizeCallback(_mainWindow, framebufferSizeCallback);
+    
 
-    // Begin Shader Compile
-    // One shaderprogram per different colored "thing"
-    // For the sake of refactoring, make an array of shaderprograms,
-    // maybe a hashtable from "thing" to shaderProgram
-    // For each different colored thing, need to modify the offset of the draw command in the main loop
-
-    // TODO: Refactor
-    int success;
-    char infoLog[512];
-    unsigned int vertexShader;
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    std::string vertexShadersrc = loadShaderSrc("../testbed/assets/vertex_core.glsl");
-    const GLchar* vertShader = vertexShadersrc.c_str();
-    glShaderSource(vertexShader, 1, &vertShader, NULL);
-    glCompileShader(vertexShader);
-
-    // catch error
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout<<"Error in vertex shader compilation: "<<std::endl<<infoLog<<std::endl;
-    }
-
-
-    // Begin Fragment Compile
-    // TODO: Refactor
-    unsigned int fragmentShader;
-    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    std::string fragmentShadersrc = loadShaderSrc("../testbed/assets/fragment_core.glsl");
-    const GLchar* fragShader = fragmentShadersrc.c_str();
-    glShaderSource(fragmentShader, 1, &fragShader, NULL);
-    glCompileShader(fragmentShader);
-
-    // catch error
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cout<<"Error in fragment shader compilation: "<<std::endl<<infoLog<<std::endl;
-    }
-
-    // Creating shader programs for linking
-    _shaderProgram = glCreateProgram();
-
-    glAttachShader(_shaderProgram, vertexShader);
-    glAttachShader(_shaderProgram, fragmentShader);
-    glLinkProgram(_shaderProgram);
-
-    // catch error
-    glGetProgramiv(_shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(_shaderProgram, 512, NULL, infoLog);
-        std::cout<< "Linking Error:" <<std::endl<<infoLog<<std::endl;
-    }
-
-    // can delete vertex and frag shader now
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-    // # TODO: End Shaders
-
-    // VAO, VBO start
-    // TODO: Refactor
+    _ResourceManager.init();
+    _ResourceManager.registerShaderProgram("triangle_left");
+    _ResourceManager.registerShaderProgram("triangle_right");
+    
 
     // vertex 
     float vertices[] = {
         // first trangle
-        0.5f, 0.5f, 0.0f,   // top right
-        -0.5f, 0.5f, 0.0f,  // top left
-        -0.5f, -0.5f, 0.0f, // bottom left
-        0.5f, -0.5f, 0.0f   // bottom right
+        -0.5, 0.5, 0.0,  // top left
+        -0.5, -0.5, 0.0, // bottom left
+        0.3, 0.5, 0.0, // top right
+
+        // second triangle
+        0.5, 0.5, 0.0, // top right
+        -0.3, -0.5, 0.0, // bottom left
+        0.5, -0.5, 0.0 // bottom right
     };
 
     unsigned int indices[] = {
       0, 1, 2, // First Triangle 
-      2, 3, 0  // Second Triange
+      3, 4, 5  // Second Triange
     };
     
-    glGenVertexArrays(1, &_VAO);
-    glGenBuffers(1, &_VBO);
-    glGenBuffers(1, &_EBO);
 
     // bind vao
-    glBindVertexArray(_VAO);
+    _ResourceManager.bindVAO();
 
     // bind vbo
-    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    _ResourceManager.bindVBO(vertices, sizeof(vertices), GL_STATIC_DRAW);
 
     // set attribute pointer 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3* sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+    _ResourceManager.setAttributePointer();
 
     // bind ebo
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-    // TODO: Done VAO, VBO, EBO
-
-
+    _ResourceManager.bindEBO(indices, sizeof(indices), GL_STATIC_DRAW);
+    
     return STATE::OKAY;
 }
 
@@ -171,13 +107,14 @@ STATE MainApp::run()
 
     while (!glfwWindowShouldClose(_mainWindow)) {
         processInput(_mainWindow);
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        _ResourceManager.clearScreen(0.2f, 0.3f, 0.3f, 1.0f);
+        
+        _ResourceManager.bindVAO();
 
         // draw shapes
-        glBindVertexArray(_VAO);
-        glUseProgram(_shaderProgram);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        _ResourceManager.useAndDraw("triangle_left", GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+        _ResourceManager.useAndDraw("triangle_right", GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)(3 * sizeof(float)));
+
 
         glfwSwapBuffers(_mainWindow);
         glfwPollEvents();
@@ -212,23 +149,3 @@ void processInput(GLFWwindow* window)
     } 
 }
 
-std::string loadShaderSrc(const char* filename)
-{
-    std::ifstream file;
-    std::stringstream buf;
-
-    std::string ret = "";
-
-    file.open(filename);
-
-    if (!file.is_open()) {
-        std::cerr<<"File "<<filename<<"is not open!"<<std::endl;
-        exit(1);
-    }
-
-    buf << file.rdbuf();
-    ret = buf.str();
-
-    file.close(); 
-    return ret;
-}

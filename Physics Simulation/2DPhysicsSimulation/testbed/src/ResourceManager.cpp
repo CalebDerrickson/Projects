@@ -106,11 +106,11 @@ void ResourceManager::bindEBO(unsigned int* indicesArray, unsigned int size, int
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indicesArray, drawingScheme);
 }
 
-void ResourceManager::setAttributePointer()
+void ResourceManager::setAttributePointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void *pointer)
 {
     
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3* sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(index, size, type, normalized, stride, pointer);
+    glEnableVertexAttribArray(index);
 
 }
 

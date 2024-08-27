@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+
 #if 0
     // Here for the sake of remembering I have this.
     #define STB_IMAGE_IMPLEMENTATION
@@ -65,25 +66,22 @@ STATE MainApp::init()
 
     _ResourceManager.init();
     _ResourceManager.registerShaderProgram("triangle_left");
-    _ResourceManager.registerShaderProgram("triangle_right");
     
 
     // vertex 
     float vertices[] = {
-        // first trangle
-        -0.5, 0.5, 0.0,  // top left
-        -0.5, -0.5, 0.0, // bottom left
-        0.3, 0.5, 0.0, // top right
-
+        // positions        // colors
+        // first triangle
+        -0.25f, -0.5f, 0.0f,   1.0f, 1.0f, 0.5f, 
+        0.15f, -0.0f, 0.0f,   0.5f, 1.0f, 0.75f,
         // second triangle
-        0.5, 0.5, 0.0, // top right
-        -0.3, -0.5, 0.0, // bottom left
-        0.5, -0.5, 0.0 // bottom right
+        0.0f, 0.5f, 0.0f,      0.6f, 1.0, 0.2f,
+        0.5f, -0.4f, 0.0f,     1.0f, 0.2f, 1.0f
     };
 
     unsigned int indices[] = {
-      0, 1, 2, // First Triangle 
-      3, 4, 5  // Second Triange
+        0, 1, 2, 
+        3, 1, 2
     };
     
 
@@ -93,8 +91,11 @@ STATE MainApp::init()
     // bind vbo
     _ResourceManager.bindVBO(vertices, sizeof(vertices), GL_STATIC_DRAW);
 
-    // set attribute pointer 
-    _ResourceManager.setAttributePointer();
+    // set position attribute pointer
+    _ResourceManager.setAttributePointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(0));
+
+    // set color attribute pointer
+    _ResourceManager.setAttributePointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 
     // bind ebo
     _ResourceManager.bindEBO(indices, sizeof(indices), GL_STATIC_DRAW);
@@ -105,16 +106,30 @@ STATE MainApp::init()
 STATE MainApp::run()
 {
 
+    // initialize unifrom matrix
+    // TODO: Abstract to resource manager
+    glm::mat4 trans(1.0f);
+    trans = glm::rotate(trans, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    glUseProgram(_ResourceManager.shaderPrograms["triangle_left"]);
+    glUniformMatrix4fv(glGetUniformLocation(_ResourceManager.shaderPrograms["triangle_left"], "transform"), 1, GL_FALSE, glm::value_ptr(trans));
+
     while (!glfwWindowShouldClose(_mainWindow)) {
+        
+        // process input
         processInput(_mainWindow);
+
+        // render
         _ResourceManager.clearScreen(0.2f, 0.3f, 0.3f, 1.0f);
         
-        _ResourceManager.bindVAO();
+        // update rotation
+        // reset matrix (has different values)
+        trans = glm::rotate(trans, glm::radians((float)glfwGetTime() / 50.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        glUniformMatrix4fv(glGetUniformLocation(_ResourceManager.shaderPrograms["triangle_left"], "transform"), 1, GL_FALSE, glm::value_ptr(trans));
+
 
         // draw shapes
-        _ResourceManager.useAndDraw("triangle_left", GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
-        _ResourceManager.useAndDraw("triangle_right", GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)(3 * sizeof(float)));
-
+        _ResourceManager.bindVAO();
+        _ResourceManager.useAndDraw("triangle_left", GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(_mainWindow);
         glfwPollEvents();

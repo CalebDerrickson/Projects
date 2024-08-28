@@ -10,6 +10,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "utils.hpp"
+
 #define RESOURCE_PATH "../testbed/assets/"
 
 
@@ -24,12 +26,16 @@ namespace shader {
 
     // Links the vertex and fragement shader to the given shader program. 
     // Also deletes the vertex and fragemnt shaders. 
-    inline void linkShaderProgram(unsigned int& shaderProgram, unsigned int& vertexShader, unsigned int& fragmentShader);
+    inline void linkShaderProgram(uint& shaderProgram, uint& vertexShader, uint& fragmentShader);
 
     inline void setAttributePointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void *pointer);
-    inline void useAndDraw(unsigned int, GLenum mode, GLsizei count, GLenum type, const void *indices);
-    inline void useShader(unsigned int shaderProgram);
-    inline void setMat4(unsigned int shaderProgram, const char* name, glm::mat4 val);
+    inline void useAndDraw(uint, GLenum mode, GLsizei count, GLenum type, const void *indices);
+    inline void useShader(uint shaderProgram);
+    inline void setMat4(uint shaderProgram, const char* name, glm::mat4 val);
+    inline void setBool(uint shaderProgram, const char* name, bool value);
+    inline void setInt(uint shaderProgram, const char* name, int value);
+    inline void setFloat(uint shaderProgram, const char* name, float value);
+    inline void set4Float(uint shaderProgram, const char* name, float v1, float v2, float v3, float v4);
 
     // *******************************
     //      METHOD DEFINITIONS 
@@ -79,7 +85,7 @@ namespace shader {
         return ret;
     }
 
-    void linkShaderProgram(unsigned int& shaderProgram, unsigned int& vertexShader, unsigned int& fragmentShader)
+    void linkShaderProgram(uint& shaderProgram, uint& vertexShader, uint& fragmentShader)
     {
 
 
@@ -109,13 +115,13 @@ namespace shader {
         glEnableVertexAttribArray(index);
     }
 
-    void useAndDraw(unsigned int shaderProgram, GLenum mode, GLsizei count, GLenum type, const void *indices)
+    void useAndDraw(uint shaderProgram, GLenum mode, GLsizei count, GLenum type, const void *indices)
     {
         useShader(shaderProgram);
         glDrawElements(mode, count, type, indices);
     }
 
-    void useShader(unsigned int shaderProgram) 
+    void useShader(uint shaderProgram) 
     {
         GLint current = 0;
         glGetIntegerv(GL_CURRENT_PROGRAM, &current);
@@ -124,9 +130,30 @@ namespace shader {
         glUseProgram(shaderProgram);
     }
 
-    void setMat4(unsigned int shaderProgram, const char* name, glm::mat4 val)
+    void setMat4(uint shaderProgram, const char* name, glm::mat4 val)
     {
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, name), 1, GL_FALSE, glm::value_ptr(val));
     }
+
+    void setBool(uint shaderProgram, const char* name, bool value)
+    {
+        glUniform1i(glGetUniformLocation(shaderProgram, name), (int)value);
+    }
+
+    void setInt(uint shaderProgram, const char* name, int value)
+    {
+        glUniform1i(glGetUniformLocation(shaderProgram, name), value);    
+    }
+
+    void setFloat(uint shaderProgram, const char* name, float value)
+    {
+        glUniform1f(glGetUniformLocation(shaderProgram, name), value);    
+    }
+
+    void set4Float(uint shaderProgram, const char* name, float v1, float v2, float v3, float v4)
+    {
+        glUniform4f(glGetUniformLocation(shaderProgram, name), v1, v2, v3, v4);
+    }
+
 
 }

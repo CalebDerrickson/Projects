@@ -3,6 +3,7 @@
 
 #pragma once
 #include "ShaderActions.hpp"
+#include "utils.hpp"
 #include <unordered_map>
 #define SHADER_PATH "../testbed/assets/shaders/"
 
@@ -16,5 +17,5 @@ public:
     void renameShaderProgram(const char* oldName, const char* newName);
 
     // Shader Program map
-    std::unordered_map<const char*, unsigned int> shaderPrograms;
+    std::unordered_map<const char*, uint> shaderPrograms;
 };

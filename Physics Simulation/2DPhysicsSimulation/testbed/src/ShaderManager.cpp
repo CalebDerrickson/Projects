@@ -17,13 +17,13 @@ void ShaderManager::registerShaderProgram(const char* shaderName)
     std::string FileName(shaderName);
 
     // vertexShader
-    unsigned int vertexShader = shader::compileShader(shader_path + "vertex_" + FileName + ".glsl", GL_VERTEX_SHADER);
+    uint vertexShader = shader::compileShader(shader_path + "vertex_" + FileName + ".glsl", GL_VERTEX_SHADER);
 
     // fragmentShader
-    unsigned int fragmentShader = shader::compileShader(shader_path + "fragment_" + FileName + ".glsl", GL_FRAGMENT_SHADER);
+    uint fragmentShader = shader::compileShader(shader_path + "fragment_" + FileName + ".glsl", GL_FRAGMENT_SHADER);
     
     // Creating shader programs for linking
-    unsigned int shaderProgram = glCreateProgram();
+    uint shaderProgram = glCreateProgram();
     shader::linkShaderProgram(shaderProgram, vertexShader, fragmentShader);
 
     shaderPrograms[shaderName] = shaderProgram;
@@ -33,18 +33,18 @@ void ShaderManager::registerShaderProgram(const char* shaderName)
 
 void ShaderManager::registerShaderProgram(const char* shaderName, const char* vertexName, const char* fragmentName)
 {
-    std::string resource_path(RESOURCE_PATH);
+    std::string resource_path(SHADER_PATH);
     std::string vertexFileName(vertexName);
     std::string fragmentFileName(fragmentName);
 
     // vertexShader
-    unsigned int vertexShader = shader::compileShader(resource_path + "vertex_" + vertexFileName + ".glsl", GL_VERTEX_SHADER);
+    uint vertexShader = shader::compileShader(resource_path + "vertex_" + vertexFileName + ".glsl", GL_VERTEX_SHADER);
 
     // fragmentShader
-    unsigned int fragmentShader = shader::compileShader(resource_path + "fragment_" + fragmentFileName + ".glsl", GL_FRAGMENT_SHADER);
+    uint fragmentShader = shader::compileShader(resource_path + "fragment_" + fragmentFileName + ".glsl", GL_FRAGMENT_SHADER);
     
     // Creating shader programs for linking
-    unsigned int shaderProgram = glCreateProgram();
+    uint shaderProgram = glCreateProgram();
     shader::linkShaderProgram(shaderProgram, vertexShader, fragmentShader);
 
     shaderPrograms[shaderName] = shaderProgram;

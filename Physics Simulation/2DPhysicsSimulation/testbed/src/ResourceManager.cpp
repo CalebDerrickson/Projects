@@ -32,13 +32,13 @@ void ResourceManager::bindVAO()
     glBindVertexArray(VAO);
 }
 
-void ResourceManager::bindVBO(float* verticesArray, unsigned int size, int drawingScheme)
+void ResourceManager::bindVBO(float* verticesArray, uint size, int drawingScheme)
 {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, size, verticesArray, drawingScheme);
 }
 
-void ResourceManager::bindEBO(unsigned int* indicesArray, unsigned int size, int drawingScheme)
+void ResourceManager::bindEBO(uint* indicesArray, uint size, int drawingScheme)
 {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indicesArray, drawingScheme);

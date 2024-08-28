@@ -4,7 +4,7 @@
 //    PRIVATE METHOD DECLARATIONS 
 // *******************************
 std::string loadShaderSrc(const std::string& filename);
-
+GLuint compileShader(const std::string& filePath, GLenum type);
 
 
 
@@ -35,36 +35,11 @@ void ResourceManager::registerShaderProgram(const char* shaderName)
     std::string FileName(shaderName);
 
     // vertexShader
-    int success;
-    char infoLog[512];
-    unsigned int vertexShader;
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    std::string vertexShadersrc = loadShaderSrc(resource_path + "vertex_" + FileName + ".glsl");
-    const GLchar* vertShader = vertexShadersrc.c_str();
-    glShaderSource(vertexShader, 1, &vertShader, NULL);
-    glCompileShader(vertexShader);
-
-    // catch error
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout<<"Error in vertex shader compilation: "<<std::endl<<infoLog<<std::endl;
-    }
+    unsigned int vertexShader = compileShader(resource_path + "vertex_" + FileName + ".glsl", GL_VERTEX_SHADER);
 
     // fragmentShader
-    unsigned int fragmentShader;
-    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    std::string fragmentShadersrc = loadShaderSrc(resource_path + "fragment_" + FileName + ".glsl");
-    const GLchar* fragShader = fragmentShadersrc.c_str();
-    glShaderSource(fragmentShader, 1, &fragShader, NULL);
-    glCompileShader(fragmentShader);
-
-    // catch error
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cout<<"Error in fragment shader compilation: "<<std::endl<<infoLog<<std::endl;
-    }
+    unsigned int fragmentShader = compileShader(resource_path + "fragment_" + FileName + ".glsl", GL_FRAGMENT_SHADER);
+    
 
     // Creating shader programs for linking
     unsigned int shaderProgram = glCreateProgram();
@@ -74,20 +49,23 @@ void ResourceManager::registerShaderProgram(const char* shaderName)
     glLinkProgram(shaderProgram);
 
     // catch error
+    int success;
+    char infoLog[512];
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
         std::cout<< "Linking Error:" <<std::endl<<infoLog<<std::endl;
+        exit(1);
     }
 
     shaderPrograms[shaderName] = shaderProgram;
-
 
     // can delete vertex and frag shader now
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
     std::cout<<"Shader Registered: "<<shaderName<<std::endl;
 }
+
 
 void ResourceManager::bindVAO()
 {
@@ -122,14 +100,34 @@ void ResourceManager::clearScreen(GLfloat red, GLfloat green, GLfloat blue, GLfl
 
 void ResourceManager::useAndDraw(const char* shaderProgram, GLenum mode, GLsizei count, GLenum type, const void *indices)
 {
+    useShader(shaderProgram);
+    glDrawElements(mode, count, type, indices);
+}
+
+void ResourceManager::useShader(const char* shaderProgram) 
+{
     if (shaderPrograms.find(shaderProgram) == shaderPrograms.end()) {
         std::cerr<<"Requested shader program "<<shaderProgram<<" has not been registered. "<<std::endl;
         exit(1);
     }
 
+    GLint current = 0;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &current);
+    if (shaderPrograms[shaderProgram] == current) return;
+
     glUseProgram(shaderPrograms[shaderProgram]);
-    glDrawElements(mode, count, type, indices);
 }
+
+void ResourceManager::setMat4(const char* shaderProgram, const char* name, glm::mat4 val)
+{
+    if (shaderPrograms.find(shaderProgram) == shaderPrograms.end()) {
+        std::cerr<<"Requested shader program "<<shaderProgram<<" has not been registered. "<<std::endl;
+        exit(1);
+    }
+
+    glUniformMatrix4fv(glGetUniformLocation(shaderPrograms[shaderProgram], name), 1, GL_FALSE, glm::value_ptr(val));
+}
+
 
 // *******************************
 //    PRIVATE METHOD DEFINITIONS
@@ -152,5 +150,27 @@ std::string loadShaderSrc(const std::string& filename)
     ret = buf.str();
 
     file.close(); 
+    return ret;
+}
+
+GLuint compileShader(const std::string& filePath, GLenum type)
+{
+
+    int success;
+    char infoLog[512];
+
+    GLuint ret  = glCreateShader(type);
+    std::string shaderSrc = loadShaderSrc(filePath);
+    const GLchar* shader = shaderSrc.c_str();
+    glShaderSource(ret, 1, &shader, NULL);
+    glCompileShader(ret);
+
+    glGetShaderiv(ret, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(ret, 512, NULL, infoLog);
+        std::cout<<"Error in shader compilation: "<<std::endl<<infoLog<<std::endl;
+        exit(1);
+    }
+    
     return ret;
 }

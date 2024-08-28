@@ -66,14 +66,15 @@ STATE MainApp::init()
 
     _ResourceManager.init();
     _ResourceManager.registerShaderProgram("triangle_left");
+    _ResourceManager.registerShaderProgram("triangle_right");
     
 
     // vertex 
     float vertices[] = {
-        // positions        // colors
+        // positions           // colors
         // first triangle
         -0.25f, -0.5f, 0.0f,   1.0f, 1.0f, 0.5f, 
-        0.15f, -0.0f, 0.0f,   0.5f, 1.0f, 0.75f,
+        0.15f, -0.0f, 0.0f,    0.5f, 1.0f, 0.75f,
         // second triangle
         0.0f, 0.5f, 0.0f,      0.6f, 1.0, 0.2f,
         0.5f, -0.4f, 0.0f,     1.0f, 0.2f, 1.0f
@@ -106,12 +107,18 @@ STATE MainApp::init()
 STATE MainApp::run()
 {
 
-    // initialize unifrom matrix
     // TODO: Abstract to resource manager
+    // TODO (priority 1) should be delayed until resource manager todo has been done.  
+    // shader 1
     glm::mat4 trans(1.0f);
     trans = glm::rotate(trans, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    glUseProgram(_ResourceManager.shaderPrograms["triangle_left"]);
-    glUniformMatrix4fv(glGetUniformLocation(_ResourceManager.shaderPrograms["triangle_left"], "transform"), 1, GL_FALSE, glm::value_ptr(trans));
+
+    _ResourceManager.useShader("triangle_left");
+    _ResourceManager.setMat4("triangle_left", "transform", trans);
+    
+    // shader 2
+    _ResourceManager.useShader("triangle_right");
+    _ResourceManager.setMat4("triangle_right", "transform", trans);
 
     while (!glfwWindowShouldClose(_mainWindow)) {
         
@@ -124,12 +131,20 @@ STATE MainApp::run()
         // update rotation
         // reset matrix (has different values)
         trans = glm::rotate(trans, glm::radians((float)glfwGetTime() / 50.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        glUniformMatrix4fv(glGetUniformLocation(_ResourceManager.shaderPrograms["triangle_left"], "transform"), 1, GL_FALSE, glm::value_ptr(trans));
+
+        // shader1
+        _ResourceManager.useShader("triangle_left");
+        _ResourceManager.setMat4("triangle_left", "transform", trans);
+
+        // shader2
+        _ResourceManager.useShader("triangle_right");
+        _ResourceManager.setMat4("triangle_right", "transform", trans);
 
 
         // draw shapes
         _ResourceManager.bindVAO();
-        _ResourceManager.useAndDraw("triangle_left", GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        _ResourceManager.useAndDraw("triangle_left", GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+        _ResourceManager.useAndDraw("triangle_right", GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)(3*sizeof(float)));
 
         glfwSwapBuffers(_mainWindow);
         glfwPollEvents();

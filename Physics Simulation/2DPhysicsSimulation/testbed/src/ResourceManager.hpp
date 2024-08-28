@@ -29,17 +29,16 @@ public:
     void init();
 
     void registerShaderProgram(const char* shaderName);
+    void registerShaderProgram( const char* shaderName, const char* vertexName, const char* fragmentName);
+    void renameShaderProgram(const char* oldName, const char* newName);
 
     void bindVAO();
     void bindVBO(float* verticesArray, unsigned int size, int drawingScheme);
     void bindEBO(unsigned int* indicesArray, unsigned int size, int drawingScheme);
 
-    void setAttributePointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void *pointer);
 
     void clearScreen(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
-    void useAndDraw(const char* shaderProgram, GLenum mode, GLsizei count, GLenum type, const void *indices);
-    void useShader(const char* shaderProgram);
-    void setMat4(const char* shaderProgram, const char* name, glm::mat4 val);
+
 
 // private:
 

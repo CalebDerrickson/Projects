@@ -1,10 +1,5 @@
 #include "MainApp.hpp"
-
-// # TODO: Temporary
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
+#include "ShaderActions.hpp"
 
 #if 0
     // Here for the sake of remembering I have this.
@@ -12,14 +7,6 @@
     #include <stb_image.h>
 #endif
 // # TODO: End Temporary
-
-// To compile shader/fragment programs
-// TODO: Refactor this
-#include <fstream>
-#include <sstream>
-#include <streambuf>
-#include <string>
-
 
 
 // *******************************
@@ -93,10 +80,10 @@ STATE MainApp::init()
     _ResourceManager.bindVBO(vertices, sizeof(vertices), GL_STATIC_DRAW);
 
     // set position attribute pointer
-    _ResourceManager.setAttributePointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(0));
+   shader::setAttributePointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(0));
 
     // set color attribute pointer
-    _ResourceManager.setAttributePointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    shader::setAttributePointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 
     // bind ebo
     _ResourceManager.bindEBO(indices, sizeof(indices), GL_STATIC_DRAW);
@@ -106,6 +93,11 @@ STATE MainApp::init()
 
 STATE MainApp::run()
 {
+    _ResourceManager.renameShaderProgram("triangle_left", "left");
+    _ResourceManager.renameShaderProgram("triangle_right", "right");
+
+    unsigned int left = _ResourceManager.shaderPrograms["left"];
+    unsigned int right = _ResourceManager.shaderPrograms["right"];
 
     // TODO: Abstract to resource manager
     // TODO (priority 1) should be delayed until resource manager todo has been done.  
@@ -113,12 +105,12 @@ STATE MainApp::run()
     glm::mat4 trans(1.0f);
     trans = glm::rotate(trans, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
-    _ResourceManager.useShader("triangle_left");
-    _ResourceManager.setMat4("triangle_left", "transform", trans);
+    shader::useShader(left);
+    shader::setMat4(left, "transform", trans);
     
     // shader 2
-    _ResourceManager.useShader("triangle_right");
-    _ResourceManager.setMat4("triangle_right", "transform", trans);
+    shader::useShader(right);
+    shader::setMat4(right, "transform", trans);
 
     while (!glfwWindowShouldClose(_mainWindow)) {
         
@@ -133,18 +125,18 @@ STATE MainApp::run()
         trans = glm::rotate(trans, glm::radians((float)glfwGetTime() / 50.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
         // shader1
-        _ResourceManager.useShader("triangle_left");
-        _ResourceManager.setMat4("triangle_left", "transform", trans);
+        shader::useShader(left);
+        shader::setMat4(left, "transform", trans);
 
         // shader2
-        _ResourceManager.useShader("triangle_right");
-        _ResourceManager.setMat4("triangle_right", "transform", trans);
+        shader::useShader(right);
+        shader::setMat4(right, "transform", trans);
 
 
         // draw shapes
         _ResourceManager.bindVAO();
-        _ResourceManager.useAndDraw("triangle_left", GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
-        _ResourceManager.useAndDraw("triangle_right", GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)(3*sizeof(float)));
+        shader::useAndDraw(left, GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+        shader::useAndDraw(right, GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)(3*sizeof(float)));
 
         glfwSwapBuffers(_mainWindow);
         glfwPollEvents();

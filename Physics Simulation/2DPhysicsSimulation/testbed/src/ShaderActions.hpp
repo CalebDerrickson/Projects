@@ -7,7 +7,6 @@
 #include <sstream>
 #include <streambuf>
 #include <iostream>
-#include <unordered_map>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -47,7 +46,7 @@ namespace shader {
         file.open(filename);
 
         if (!file.is_open()) {
-            std::cerr<<"File "<<filename<<"is not open!"<<std::endl;
+            std::cerr<<"File "<<filename<<" is not open!"<<std::endl;
             exit(1);
         }
 

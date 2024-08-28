@@ -24,7 +24,7 @@ MainApp::MainApp(int width, int height, const char* title)
     :   BaseApp(width, height, title),
         _ResourceManager()
 {
-
+    _pShaderManager = &_ResourceManager.shaderManager;
 }
 
 MainApp::~MainApp()
@@ -52,8 +52,8 @@ STATE MainApp::init()
     
 
     _ResourceManager.init();
-    _ResourceManager.registerShaderProgram("triangle_left");
-    _ResourceManager.registerShaderProgram("triangle_right");
+    _pShaderManager->registerShaderProgram("triangle_left");
+    _pShaderManager->registerShaderProgram("triangle_right");
     
 
     // vertex 
@@ -93,11 +93,11 @@ STATE MainApp::init()
 
 STATE MainApp::run()
 {
-    _ResourceManager.renameShaderProgram("triangle_left", "left");
-    _ResourceManager.renameShaderProgram("triangle_right", "right");
+    _pShaderManager->renameShaderProgram("triangle_left", "left");
+    _pShaderManager->renameShaderProgram("triangle_right", "right");
 
-    unsigned int left = _ResourceManager.shaderPrograms["left"];
-    unsigned int right = _ResourceManager.shaderPrograms["right"];
+    unsigned int left = _pShaderManager->shaderPrograms["left"];
+    unsigned int right = _pShaderManager->shaderPrograms["right"];
 
     // TODO: Abstract to resource manager
     // TODO (priority 1) should be delayed until resource manager todo has been done.  

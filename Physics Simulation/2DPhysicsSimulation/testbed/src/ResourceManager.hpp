@@ -1,16 +1,9 @@
 #pragma once
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <streambuf>
-#include <iostream>
-#include <unordered_map>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #define RESOURCE_PATH "../testbed/assets/"
+
+#include "ShaderManager.hpp"
+
 
 // TODO: Separate Shaders into classes based on their management and actions upon them. 
 // TODO: Add function to register new shader based on different fragment and vertex shaders.
@@ -28,10 +21,6 @@ public:
     // TODO: should provide their respective amount?
     void init();
 
-    void registerShaderProgram(const char* shaderName);
-    void registerShaderProgram( const char* shaderName, const char* vertexName, const char* fragmentName);
-    void renameShaderProgram(const char* oldName, const char* newName);
-
     void bindVAO();
     void bindVBO(float* verticesArray, unsigned int size, int drawingScheme);
     void bindEBO(unsigned int* indicesArray, unsigned int size, int drawingScheme);
@@ -46,6 +35,6 @@ public:
     unsigned int VBO;
     unsigned int EBO;
 
-    // Shader Program map
-    std::unordered_map<const char*, unsigned int> shaderPrograms;
+    ShaderManager shaderManager;
+
 };

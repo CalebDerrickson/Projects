@@ -16,4 +16,7 @@ private:
     // window pointer is provided by the BaseApp class
 
     ResourceManager _ResourceManager;
+
+    // Pointer to _ResourceManager's shaderManager for ease of access
+    ShaderManager* _pShaderManager;
 };

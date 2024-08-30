@@ -1,13 +1,24 @@
 #include "utils.hpp"
+#include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 namespace textures{
 
-    void useTexture(uint textureId)
-    {
-        glActiveTexture(GL_TEXTURE0 + textureId);
-        glBindTexture(GL_TEXTURE_2D, textureId);
+
+
+    inline FILE_EXTENSION assignFileExension(const std::string& str ){
+        if (str.compare("png") == 0) {
+            return FILE_EXTENSION::PNG;
+        }else if (str.compare("jpg") == 0) {
+            return FILE_EXTENSION::JPG;
+        }
+        else {
+            std::cout<<"File Extension "<<str<<" not implemented!"<<std::endl;
+            return FILE_EXTENSION::UNKNOWN;
+        }
     }
+
+
 
 };

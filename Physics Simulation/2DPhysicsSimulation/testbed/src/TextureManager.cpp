@@ -1,11 +1,11 @@
 #include "TextureManager.hpp"
-
+#include "TextureActions.hpp"
 
 #include <stb_image.h>
 
 TextureManager::TextureManager()
 {
-
+    nTexturesRegistered = 0;
 
 }
 
@@ -15,12 +15,13 @@ TextureManager::~TextureManager()
 
 }
 
-void TextureManager::registerTextureProgram(const char* textureName, int options[][3], int nOptions)
+void TextureManager::registerTextureProgram(const std::string& textureName, FILE_EXTENSION fileExtension, int options[][3], int nOptions)
 {
-    
+
     // generate texture
     uint textureId;
     glGenTextures(1, &textureId);
+    glActiveTexture(GL_TEXTURE0 + nTexturesRegistered);
     glBindTexture(GL_TEXTURE_2D, textureId);
 
     for (int i = 0; i < nOptions; i++) {
@@ -35,29 +36,63 @@ void TextureManager::registerTextureProgram(const char* textureName, int options
     stbi_set_flip_vertically_on_load(true);
     std::string TexturePath(TEXTURE_PATH);
     std::string TextureName(TexturePath + textureName);
-    unsigned char* data = stbi_load((TextureName + ".jpg").c_str(), &width, &height, &nChannels, 0);
+    unsigned char* data = 0;
 
-    
-    if (data) {
-        // loads into GL_TEXTURE0 texture unit. points to texture id, then to the gpu
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        // mipmap
-        glGenerateMipmap(GL_TEXTURE_2D);
+    // switch on different picture extensions
+    switch (fileExtension)
+    {
+        case FILE_EXTENSION::JPG :
+        {
+            data = stbi_load((TextureName + ".jpg").c_str(), &width, &height, &nChannels, 0);
+            if (data) 
+            {        
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+                glGenerateMipmap(GL_TEXTURE_2D);
+            }
+            break;
+        }
+        case FILE_EXTENSION::PNG :
+        {
+            data = stbi_load((TextureName + ".png").c_str(), &width, &height, &nChannels, 0);
+            if (data)
+            {
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+                glGenerateMipmap(GL_TEXTURE_2D);
+            }
+            break;
+        }
+        case FILE_EXTENSION::UNKNOWN :
+        {
+            std::cout<<"Unknown File Extension!"<<std::endl;
+            break;
+        }
+
+        default:    
+            break;
     }
-    else {
-        std::cout<<"Failed to load texture!"<<std::endl;
+    
+    if (!data) {
+        std::cout<<"Texture failed to load!"<<std::endl;
     }
 
     // Can freely delete data
-    stbi_image_free(data);
-
-    texturePrograms[textureName] = textureId; 
+    stbi_image_free(data);;
+    texturePrograms[textureName.c_str()] = textureRef(textureId, GL_TEXTURE0 + ++nTexturesRegistered); 
+    ;
     std::cout<<"Texture registered: "<<textureName<<std::endl;
 }
 
 void TextureManager::renameTextureProgram(const char* oldName, const char* newName)
 {
-    uint textureId = texturePrograms[oldName];
+    textureRef ref = texturePrograms[oldName];
     texturePrograms.erase(oldName);
-    texturePrograms[newName] = textureId;
+    texturePrograms[newName] = ref;
+}
+
+
+void TextureManager::useTexture(const char* name)
+{
+    textureRef ref = texturePrograms[name];
+    glActiveTexture(ref.textureUnit); 
+    glBindTexture(GL_TEXTURE_2D, ref.textureId);
 }

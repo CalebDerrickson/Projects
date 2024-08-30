@@ -119,10 +119,10 @@ STATE MainApp::run()
         {GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST}
     };
 
-    _pTextureManager->registerTextureProgram("obamna", options, 4);
+    _pTextureManager->registerTextureProgram("skull", FILE_EXTENSION::PNG, options, 4);
 
     shader::useShader(left);
-    shader::setInt(left, "texture1", 0);
+    shader::setInt(left, "texture1", _pTextureManager->texturePrograms["skull"].textureId);
     // TODO: End Refactor
 
 
@@ -136,8 +136,7 @@ STATE MainApp::run()
         _ResourceManager.clearScreen(0.2f, 0.3f, 0.3f, 1.0f);
 
         // activate and bind obama
-        textures::useTexture(_pTextureManager->texturePrograms["obamna"]);
-
+        _pTextureManager->useTexture("skull");
 
         // draw shapes
         // NOTE: The texture is still bound, so both draw calls will respond to texture1

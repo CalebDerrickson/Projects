@@ -1,4 +1,4 @@
-// Mangaing class to handle working with shaders
+// Managing class to handle working with shaders
 
 
 #pragma once

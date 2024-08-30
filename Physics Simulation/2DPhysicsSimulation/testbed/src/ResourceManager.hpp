@@ -3,6 +3,7 @@
 #define RESOURCE_PATH "../testbed/assets/"
 
 #include "ShaderManager.hpp"
+#include "TextureManager.hpp"
 #include "utils.hpp"
 
 class ResourceManager {
@@ -30,5 +31,5 @@ public:
     uint EBO;
 
     ShaderManager shaderManager;
-
+    TextureManager textureManager;
 };

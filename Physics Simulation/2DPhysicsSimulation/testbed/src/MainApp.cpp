@@ -1,8 +1,7 @@
 #include "MainApp.hpp"
 #include "ShaderActions.hpp"
+#include "TextureActions.hpp"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
 
 
 // *******************************
@@ -21,6 +20,7 @@ MainApp::MainApp(int width, int height, const char* title)
         _ResourceManager()
 {
     _pShaderManager = &_ResourceManager.shaderManager;
+    _pTextureManager = &_ResourceManager.textureManager;
 }
 
 MainApp::~MainApp()
@@ -82,10 +82,8 @@ STATE MainApp::init()
     shader::setAttributePointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 
     // set texture coordinates attribute pointer
-    // TODO: Refactor
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
+    shader::setAttributePointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    
     // bind ebo
     _ResourceManager.bindEBO(indices, sizeof(indices), GL_STATIC_DRAW);
     
@@ -113,35 +111,16 @@ STATE MainApp::run()
     // texture unit -> textures -> image data
     // when we do shader::setInt(...), we are telling the shader to point to whatever texture unit we tell it to
 
-    uint texture1;
+    // options for texture
+    int options[4][3] = {
+        {GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT},
+        {GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT},
+        {GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR},
+        {GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST}
+    };
 
-    glGenTextures(1, &texture1);
-    glBindTexture(GL_TEXTURE_2D, texture1);
+    _pTextureManager->registerTextureProgram("obamna", options, 4);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-    // load image
-    int width, height, nChannels;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char* data = stbi_load("../testbed/assets/textures/obamna.jpg", &width, &height, &nChannels, 0); 
-
-
-    if (data) {
-        // loads into GL_TEXTURE0 texture unit. points to texture id, then to the gpu
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        // mipmap
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else {
-        std::cout<<"Failed to load texture!"<<std::endl;
-    }
-
-    // Can freely delete data
-    stbi_image_free(data);
     shader::useShader(left);
     shader::setInt(left, "texture1", 0);
     // TODO: End Refactor
@@ -156,10 +135,8 @@ STATE MainApp::run()
         // render
         _ResourceManager.clearScreen(0.2f, 0.3f, 0.3f, 1.0f);
 
-        // TODO: Refactoring for textures
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture1);
-        // TODO: End Refactor
+        // activate and bind obama
+        textures::useTexture(_pTextureManager->texturePrograms["obamna"]);
 
 
         // draw shapes

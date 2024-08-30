@@ -19,4 +19,5 @@ private:
 
     // Pointer to _ResourceManager's shaderManager for ease of access
     ShaderManager* _pShaderManager;
+    TextureManager* _pTextureManager;
 };

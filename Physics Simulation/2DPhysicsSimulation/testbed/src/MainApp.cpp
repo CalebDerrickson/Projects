@@ -68,23 +68,12 @@ STATE MainApp::init()
         3, 1, 2
     };
     
-
-    // bind vao
+    // Bind VAO, VBO, EBO, and attribute pointers
     _ResourceManager.bindVAO();
-
-    // bind vbo
     _ResourceManager.bindVBO(vertices, sizeof(vertices), GL_STATIC_DRAW);
-
-    // set position attribute pointer
     shader::setAttributePointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(0));
-
-    // set color attribute pointer
     shader::setAttributePointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-
-    // set texture coordinates attribute pointer
     shader::setAttributePointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    
-    // bind ebo
     _ResourceManager.bindEBO(indices, sizeof(indices), GL_STATIC_DRAW);
     
     return STATE::OKAY;
@@ -119,35 +108,38 @@ STATE MainApp::run()
         {GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST}
     };
 
-    _pTextureManager->registerTextureProgram("skull", FILE_EXTENSION::PNG, options, 4);
+    // Register and bind textures
+    _pTextureManager->registerTextureProgram("usa", FILE_EXTENSION::PNG, options, 4);
+    _pTextureManager->registerTextureProgram("obamna", FILE_EXTENSION::JPG, options, 4);
 
+    // Set the texture units in the shaders
     shader::useShader(left);
-    shader::setInt(left, "texture1", _pTextureManager->texturePrograms["skull"].textureId);
-    // TODO: End Refactor
-
-
+    shader::setInt(left, "texture1", _pTextureManager->texturePrograms["obamna"].textureUnit); 
+    shader::setInt(left, "texture2", _pTextureManager->texturePrograms["usa"].textureUnit); 
+    
+    shader::useShader(right);
+    shader::setInt(right, "texture1", _pTextureManager->texturePrograms["obamna"].textureUnit); 
+    shader::setInt(right, "texture2", _pTextureManager->texturePrograms["usa"].textureUnit); 
 
     while (!glfwWindowShouldClose(_mainWindow)) {
-        
-        // process input
+        // Process input
         processInput(_mainWindow);
 
-        // render
+        // Render
         _ResourceManager.clearScreen(0.2f, 0.3f, 0.3f, 1.0f);
 
-        // activate and bind obama
-        _pTextureManager->useTexture("skull");
+        // Activate and bind textures to their units
+        _pTextureManager->useTexture("usa");   
+        _pTextureManager->useTexture("obamna");
 
-        // draw shapes
-        // NOTE: The texture is still bound, so both draw calls will respond to texture1
+        // Draw shapes
         _ResourceManager.bindVAO();
         shader::useAndDraw(left, GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
         shader::useAndDraw(right, GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)(3*sizeof(float)));
 
         glfwSwapBuffers(_mainWindow);
         glfwPollEvents();
-    } 
-
+    }
     return STATE::OKAY;
 }
 

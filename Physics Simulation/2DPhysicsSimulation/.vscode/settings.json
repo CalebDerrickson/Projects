@@ -106,5 +106,6 @@
         "fstream": "cpp",
         "iomanip": "cpp",
         "sstream": "cpp"
-    }
+    },
+    "cmake.ignoreCMakeListsMissing": true
 }

@@ -64,8 +64,10 @@ void TextureManager::registerTextureProgram(const std::string& textureName, FILE
     
     // Store texture ID and texture unit
     texturePrograms[textureName.c_str()] = textureRef(textureId, nTexturesRegistered);
-    std::cout << "Texture registered: " << textureName <<' '<<textureId<<' '<<nTexturesRegistered<<std::endl;
-    std::cout << "Address of textureRef for " << textureName << ": " << &texturePrograms[textureName.c_str()] << std::endl;
+    std::cout << "Texture registered: " << textureName <<std::endl;
+    // for debugging
+    // ' '<<textureId<<' '<<nTexturesRegistered<<std::endl;
+    // std::cout << "Address of textureRef for " << textureName << ": " << &texturePrograms[textureName.c_str()] << std::endl;
     nTexturesRegistered++;
 }
 

@@ -2,6 +2,10 @@
 #include "BaseApp.hpp"
 #include "ResourceManager.hpp"
 
+#include "io/Keyboard.hpp"
+#include "io/Mouse.hpp"
+#include "io/Joystick.hpp"
+
 class MainApp : public BaseApp
 {
 public:
@@ -11,6 +15,12 @@ public:
     STATE init() override;
     STATE run() override;
     STATE shutdown() override;
+
+    glm::mat4 transform = glm::mat4(1.0f);
+    Joystick mainJ = Joystick(0);
+
+    float mixVal = 0.5f;
+
 
 private:
     // window pointer is provided by the BaseApp class

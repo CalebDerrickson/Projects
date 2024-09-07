@@ -1,7 +1,7 @@
 @ECHO OFF
 REM Clean everything
 
-ECHO "Cleaining everything..."
+ECHO "Cleaning everything..."
 
 REM Testbed
 make -f "Makefile.testbed.mak" clean

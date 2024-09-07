@@ -24,8 +24,8 @@ public:
     
 protected:
     
-    uint32_t _width;
-    uint32_t _height;
+    uint32_t _screenWidth;
+    uint32_t _screenHeight;
     const char* _title;
 
     // glad requires a context window for initialization

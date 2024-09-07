@@ -41,7 +41,7 @@ STATE MainApp::init()
     const GLubyte* version = glGetString(GL_VERSION);
     std::cout<<"Using OpenGL version "<< version<<std::endl;
 
-    glViewport(0, 0, _width, _height);
+    glViewport(0, 0, _screenWidth, _screenHeight);
 
     // Setting window update on resize
     glfwSetFramebufferSizeCallback(_mainWindow, framebufferSizeCallback);
@@ -52,34 +52,73 @@ STATE MainApp::init()
     glfwSetMouseButtonCallback(_mainWindow, Mouse::mouseButtonCallback);
     glfwSetScrollCallback(_mainWindow, Mouse::mouseWheelCallback);
 
+    // Enables Depth testing. Also needs to be updated in the main loop
+    glEnable(GL_DEPTH_TEST);
+
     _ResourceManager.init();
-    _pShaderManager->registerShaderProgram("triangle_left", "triangle", "triangle");
-    _pShaderManager->registerShaderProgram("triangle_right", "triangle", "triangle");
+    _pShaderManager->registerShaderProgram("cube_left", "cube", "cube");
+    _pShaderManager->registerShaderProgram("cube_right", "cube", "cube");
     
 
-    // vertex 
-    float vertices[] = {
-        // positions           // colors            // texture coordinates
-        // first triangle
-        -0.5f, -0.5f, 0.0f,    1.0f, 1.0f, 0.5f,    0.0f, 0.0f,
-        -0.5f,  0.5f, 0.0f,    0.5f, 1.0f, 0.75f,   0.0f, 1.0f,
-        // second triangle
-        0.5f, -0.5f, 0.0f,     0.6f, 1.0, 0.2f,     1.0f, 0.0f,
-        0.5f,  0.5f, 0.0f,     1.0f, 0.2f, 1.0f,    1.0f, 1.0f
-    };
+    // vertices for cube
+float vertices[] = {
+    // Position           // Texture
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 
-    uint indices[] = {
-        0, 1, 2,
-        3, 1, 2
-    };
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+};
     
     // Bind VAO, VBO, EBO, and attribute pointers
     _ResourceManager.bindVAO();
     _ResourceManager.bindVBO(vertices, sizeof(vertices), GL_STATIC_DRAW);
-    shader::setAttributePointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(0));
-    shader::setAttributePointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    shader::setAttributePointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    _ResourceManager.bindEBO(indices, sizeof(indices), GL_STATIC_DRAW);
+    shader::setAttributePointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(0));
+    
+    // No Color attribute (for now)
+    // shader::setAttributePointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    
+    
+    shader::setAttributePointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    
+    // Using VAO (for now)
+    // _ResourceManager.bindEBO(indices, sizeof(indices), GL_STATIC_DRAW); 
     
     // IO init
     mainJ.update();
@@ -96,11 +135,11 @@ STATE MainApp::init()
 
 STATE MainApp::run()
 {
-    _pShaderManager->renameShaderProgram("triangle_left", "left");
-    _pShaderManager->renameShaderProgram("triangle_right", "right");
+    
+    // TODO: Refactor everything before the main loop. 
 
-    uint left = _pShaderManager->shaderPrograms["left"];
-    uint right = _pShaderManager->shaderPrograms["right"];
+    uint left = _pShaderManager->shaderPrograms["cube_left"];
+    uint right = _pShaderManager->shaderPrograms["cube_right"];
 
 
     // textures
@@ -125,6 +164,13 @@ STATE MainApp::run()
     shader::setInt(right, "texture1", _pTextureManager->texturePrograms["obamna"].textureUnit); 
     shader::setInt(right, "texture2", _pTextureManager->texturePrograms["usa"].textureUnit); 
 
+    x = 0.0f;
+    y = 0.0f;
+    z = 3.0f;
+    dir = glm::vec3(0.0f);
+    spin = 0;
+    glm::mat4 rotation = glm::mat4(1.0f);
+    
     while (!glfwWindowShouldClose(_mainWindow)) {
         // Process input
         processInput(_mainWindow, this);
@@ -138,15 +184,44 @@ STATE MainApp::run()
 
         // Draw shapes
         _ResourceManager.bindVAO();
-        
-        shader::useAndDraw(left, GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
-        shader::setFloat(left, "mixVal", mixVal);
-        shader::setMat4(left, "transform", transform);
-        
-        shader::useAndDraw(right, GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)(3*sizeof(float)));
+
+        // create transformation for screen 
+        glm::mat4 model = glm::mat4(1.0f);
+        glm::mat4 view = glm::mat4(1.0f);
+        glm::mat4 projection = glm::mat4(1.0F);
+
+        if (spin == 0) {
+            model = rotation;
+        }
+        else {
+            float angle = glm::radians(1.0f);
+            glm::mat4 deltaRotation = glm::rotate(glm::mat4(1.0f), angle, dir);
+
+            // Accumulate the rotation on the current rotation matrix
+            rotation = deltaRotation * rotation;  // Update the orientation
+            model = rotation;
+        }
+
+        model = rotation;
+        view = glm::translate(view, glm::vec3(-x, -y, -z));
+        projection = glm::perspective(glm::radians(45.0f), (float)(_screenWidth) / (float)_screenHeight, 0.1f, 100.0f);
+
+        // Just drawing the Cube
+        glDrawArrays(GL_TRIANGLES, 0, 36); 
+
+        // TODO: Create a Shader struct that contains shader programs. These functions should then be run on Shaders, 
+        //       not the individual shaderprograms
+        shader::setFloat(left, "mixVal", mixVal);        
         shader::setFloat(right, "mixVal", mixVal);
-        shader::setMat4(right, "transform", transform);
+
+        // setting mats for camera
+        shader::setMat4(left, "model", model);
+        shader::setMat4(left, "view", view);
+        shader::setMat4(left, "projection", projection);
         
+        shader::setMat4(right, "model", model);
+        shader::setMat4(right, "view", view);
+        shader::setMat4(right, "projection", projection);       
 
         glfwSwapBuffers(_mainWindow);
         glfwPollEvents();
@@ -156,6 +231,8 @@ STATE MainApp::run()
 
 STATE MainApp::shutdown()
 {
+    
+    _ResourceManager.shutdown();
     (void)BaseApp::shutdown();
 
     return STATE::OKAY;
@@ -170,6 +247,7 @@ STATE MainApp::shutdown()
 void framebufferSizeCallback(GLFWwindow* window, int width, int height) 
 {
     glViewport(0, 0, width, height);
+    // may need to update width and height?
 }
 
 
@@ -190,18 +268,22 @@ void processInput(GLFWwindow* window, MainApp* mainApp)
     // translate shader
     if (Keyboard::key(GLFW_KEY_W)) {
         mainApp->transform = glm::translate(mainApp->transform, glm::vec3(0.0f, 0.05f, 0.0f));
+        mainApp->y -= 0.05f;
     }
 
     if (Keyboard::key(GLFW_KEY_S)) {
         mainApp->transform = glm::translate(mainApp->transform, glm::vec3(0.0f, -0.05f, 0.0f));
+        mainApp->y += 0.05f;
     }
 
     if (Keyboard::key(GLFW_KEY_A)) {
         mainApp->transform = glm::translate(mainApp->transform, glm::vec3(-0.05f, 0.0f, 0.0f));
+        mainApp->x += 0.05f;
     }
 
     if (Keyboard::key(GLFW_KEY_D)) {
         mainApp->transform = glm::translate(mainApp->transform, glm::vec3(0.05f, 0.0f, 0.0f));
+        mainApp->x -= 0.05f;
     }
 
     // making the actual shader smaller
@@ -209,13 +291,57 @@ void processInput(GLFWwindow* window, MainApp* mainApp)
         if (mainApp->transform[0][0] > 0.01f) {
             mainApp->transform = glm::scale(mainApp->transform, glm::vec3(1-0.01f, 1-0.01f, 0.0f));
         }
+        mainApp->z += 0.05f;
+        
     }
 
     // making the actual shader larger
     if (Keyboard::key(GLFW_KEY_E)) {
         mainApp->transform = glm::scale(mainApp->transform, glm::vec3(1+0.01f, 1+0.01f, 0.0f));
+        
+        if (mainApp->z > 0.01f) {
+            mainApp->z -=0.05f;
+        }
     }
 
+    if (Keyboard::key(GLFW_KEY_KP_8)) {
+        mainApp->dir = glm::vec3(1.0f, 0.0f, 0.0f);
+        mainApp->spin = 1;
+    } else
+    if (Keyboard::key(GLFW_KEY_KP_9)) {
+        mainApp->dir = glm::vec3(1.0f, -1.0f, 0.0f);
+        mainApp->spin = 1;
+    } else
+    if (Keyboard::key(GLFW_KEY_KP_6)) {
+        mainApp->dir = glm::vec3(0.0f, -1.0f, 0.0f);
+        mainApp->spin = 1;
+    } else
+    if (Keyboard::key(GLFW_KEY_KP_3)) {
+        mainApp->dir = glm::vec3(-1.0f, -1.0f, 0.0f);
+        mainApp->spin = 1;
+    } else
+    if (Keyboard::key(GLFW_KEY_KP_2)) {
+        mainApp->dir = glm::vec3(-1.0f, 0.0f, 0.0f);
+        mainApp->spin = 1;
+    } else
+    if (Keyboard::key(GLFW_KEY_KP_1)) {
+        mainApp->dir = glm::vec3(-1.0f, 1.0f, 0.0f);
+        mainApp->spin = 1;
+    } else
+    if (Keyboard::key(GLFW_KEY_KP_4)) {
+        mainApp->dir = glm::vec3(0.0f, 1.0f, 0.0f);
+        mainApp->spin = 1;
+    } else
+    if (Keyboard::key(GLFW_KEY_KP_7)) {
+        mainApp->dir = glm::vec3(1.0f, 1.0f, 0.0f);
+        mainApp->spin = 1;
+    } else
+    if (Keyboard::key(GLFW_KEY_KP_5)) {
+        mainApp->spin = 0;
+    }
+    
+    mainApp->dir = glm::normalize(mainApp->dir);
+    
     mainApp->mainJ.update();
 
 }

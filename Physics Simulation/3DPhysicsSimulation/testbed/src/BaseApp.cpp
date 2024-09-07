@@ -4,7 +4,7 @@
 int BaseApp::_isInitialized = false;
 
 BaseApp::BaseApp(uint32_t width, uint32_t height, const char* title)
-    : _width(width), _height(height), _title(title)
+    : _screenWidth(width), _screenHeight(height), _title(title)
 {
     _isInitialized = SIM_NO;
 
@@ -35,7 +35,7 @@ STATE BaseApp::init()
 #endif
 
     // Initialize the window
-    _mainWindow = glfwCreateWindow(_width, _height, _title, NULL, NULL);
+    _mainWindow = glfwCreateWindow(_screenWidth, _screenHeight, _title, NULL, NULL);
     if (_mainWindow == nullptr) {
         std::cout<<"Could not create window!" << std::endl;
         glfwTerminate();

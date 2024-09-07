@@ -21,13 +21,19 @@ public:
 
     float mixVal = 0.5f;
 
+    float x;
+    float y;
+    float z;
+    glm::vec3 dir;
+    int spin;
 
 private:
     // window pointer is provided by the BaseApp class
 
     ResourceManager _ResourceManager;
 
-    // Pointer to _ResourceManager's shaderManager for ease of access
+    // Pointer to _ResourceManager's managers for ease of access
     ShaderManager* _pShaderManager;
     TextureManager* _pTextureManager;
+
 };

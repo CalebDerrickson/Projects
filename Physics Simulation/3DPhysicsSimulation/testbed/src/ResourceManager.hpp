@@ -16,6 +16,8 @@ public:
     // TODO: should provide their respective amount?
     void init();
 
+    void shutdown();
+
     void bindVAO();
     void bindVBO(float* verticesArray, uint size, int drawingScheme);
     void bindEBO(uint* indicesArray, uint size, int drawingScheme);

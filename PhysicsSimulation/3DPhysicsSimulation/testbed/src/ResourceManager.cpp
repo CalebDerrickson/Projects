@@ -10,7 +10,10 @@
 //    CLASS METHOD DEFINITIONS
 // *******************************
 
-ResourceManager::ResourceManager()
+ResourceManager::ResourceManager(LinearAllocator& allocator) 
+    : _linearAllocator(allocator),
+      shaderManager(nullptr),
+      textureManager(nullptr)
 {
 
 }
@@ -24,7 +27,9 @@ void ResourceManager::init()
 {
     glGenBuffers(1, &VBO);
     glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &EBO);
+	glGenBuffers(1, &EBO);  
+    shaderManager = new (_linearAllocator.allocate(sizeof(ShaderManager))) ShaderManager();
+    textureManager = new (_linearAllocator.allocate(sizeof(TextureManager))) TextureManager();
 }
 
 void ResourceManager::shutdown()

@@ -3,8 +3,10 @@
 
 #pragma once
 #include "ShaderActions.hpp"
+#include "Shader.hpp"
 #include "utils.hpp"
 #include <unordered_map>
+#include <vector>
 #define SHADER_PATH "../testbed/assets/shaders/"
 
 class ShaderManager{
@@ -18,4 +20,7 @@ public:
 
     // Shader Program map
     std::unordered_map<const char*, uint> shaderPrograms;
+
+    // Shader Map
+    // std::vector<Shader*> 
 };

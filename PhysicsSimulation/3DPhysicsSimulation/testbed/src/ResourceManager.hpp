@@ -5,11 +5,12 @@
 #include "ShaderManager.hpp"
 #include "TextureManager.hpp"
 #include "utils.hpp"
+#include "memory/LinearAllocator.hpp"
 
 class ResourceManager {
 public:
 
-    ResourceManager();
+    ResourceManager(LinearAllocator& allocator);
     ~ResourceManager();
 
     // initializing vao, vbo, ebo
@@ -32,6 +33,8 @@ public:
     uint VBO;
     uint EBO;
 
-    ShaderManager shaderManager;
-    TextureManager textureManager;
+    ShaderManager* shaderManager;
+    TextureManager* textureManager;
+
+    LinearAllocator& _linearAllocator;
 };

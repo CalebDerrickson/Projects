@@ -17,10 +17,9 @@ void processInput(GLFWwindow* window, MainApp* mainApp);
 
 MainApp::MainApp(int width, int height, const char* title)
     :   BaseApp(width, height, title),
-        _ResourceManager()
+        _linearAllocator(10* KB)
 {
-    _pShaderManager = &_ResourceManager.shaderManager;
-    _pTextureManager = &_ResourceManager.textureManager;
+
 }
 
 MainApp::~MainApp()
@@ -55,7 +54,16 @@ STATE MainApp::init()
     // Enables Depth testing. Also needs to be updated in the main loop
     glEnable(GL_DEPTH_TEST);
 
-    _ResourceManager.init();
+    // linear allocator init. Initialize with 10k bytes. 
+    
+    
+
+    // Resource Manager Init
+    _ResourceManager = new (_linearAllocator.allocate(sizeof(ResourceManager))) ResourceManager(_linearAllocator);
+    _ResourceManager->init();
+    _pShaderManager = _ResourceManager->shaderManager;
+    _pTextureManager = _ResourceManager->textureManager;
+
     _pShaderManager->registerShaderProgram("cube_left", "cube", "cube");
     _pShaderManager->registerShaderProgram("cube_right", "cube", "cube");
     
@@ -107,8 +115,8 @@ float vertices[] = {
 };
     
     // Bind VAO, VBO, EBO, and attribute pointers
-    _ResourceManager.bindVAO();
-    _ResourceManager.bindVBO(vertices, sizeof(vertices), GL_STATIC_DRAW);
+    _ResourceManager->bindVAO();
+    _ResourceManager->bindVBO(vertices, sizeof(vertices), GL_STATIC_DRAW);
     shader::setAttributePointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(0));
     
     // No Color attribute (for now)
@@ -176,14 +184,14 @@ STATE MainApp::run()
         processInput(_mainWindow, this);
 
         // Render
-        _ResourceManager.clearScreen(0.2f, 0.3f, 0.3f, 1.0f);
+        _ResourceManager->clearScreen(0.2f, 0.3f, 0.3f, 1.0f);
 
         // Activate and bind textures to their units
         _pTextureManager->useTexture("usa");   
         _pTextureManager->useTexture("obamna");
 
         // Draw shapes
-        _ResourceManager.bindVAO();
+        _ResourceManager->bindVAO();
 
         // create transformation for screen 
         glm::mat4 model = glm::mat4(1.0f);
@@ -231,10 +239,9 @@ STATE MainApp::run()
 
 STATE MainApp::shutdown()
 {
-    
-    _ResourceManager.shutdown();
+    _ResourceManager->shutdown();
     (void)BaseApp::shutdown();
-
+    
     return STATE::OKAY;
 }
 

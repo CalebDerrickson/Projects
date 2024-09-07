@@ -11,6 +11,8 @@ enum STATE {OKAY, ERROR};
 #define SIM_NO 0
 typedef unsigned int uint;
 
+#define KB 2 << 9
+
 
 namespace utils{
     

@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseApp.hpp"
 #include "ResourceManager.hpp"
+#include "memory/LinearAllocator.hpp"
 
 #include "io/Keyboard.hpp"
 #include "io/Mouse.hpp"
@@ -30,10 +31,13 @@ public:
 private:
     // window pointer is provided by the BaseApp class
 
-    ResourceManager _ResourceManager;
+    LinearAllocator _linearAllocator;
 
-    // Pointer to _ResourceManager's managers for ease of access
+    ResourceManager* _ResourceManager;
+
+    // Pointers to _ResourceManager's managers for ease of access
     ShaderManager* _pShaderManager;
     TextureManager* _pTextureManager;
+    
 
 };

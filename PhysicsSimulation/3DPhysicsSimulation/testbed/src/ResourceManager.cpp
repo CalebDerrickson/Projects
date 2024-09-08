@@ -23,12 +23,12 @@ ResourceManager::~ResourceManager()
 
 }
 
-void ResourceManager::init()
+void ResourceManager::init(DynamicAllocator& allocator)
 {
     glGenBuffers(1, &VBO);
     glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &EBO);  
-    shaderManager = new (_linearAllocator.allocate(sizeof(ShaderManager))) ShaderManager();
+    shaderManager = new (_linearAllocator.allocate(sizeof(ShaderManager))) ShaderManager(allocator);
     textureManager = new (_linearAllocator.allocate(sizeof(TextureManager))) TextureManager();
 }
 

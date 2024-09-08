@@ -2,6 +2,7 @@
 #include "BaseApp.hpp"
 #include "ResourceManager.hpp"
 #include "memory/LinearAllocator.hpp"
+#include "memory/DynamicAllocator.hpp"
 
 #include "io/Keyboard.hpp"
 #include "io/Mouse.hpp"
@@ -32,6 +33,7 @@ private:
     // window pointer is provided by the BaseApp class
 
     LinearAllocator _linearAllocator;
+    DynamicAllocator _dynamicAllocator;
 
     ResourceManager* _ResourceManager;
 

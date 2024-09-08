@@ -17,7 +17,8 @@ void processInput(GLFWwindow* window, MainApp* mainApp);
 
 MainApp::MainApp(int width, int height, const char* title)
     :   BaseApp(width, height, title),
-        _linearAllocator(10* KB)
+        _linearAllocator(10* KB),
+        _dynamicAllocator(5* KB)
 {
 
 }
@@ -60,13 +61,38 @@ STATE MainApp::init()
 
     // Resource Manager Init
     _ResourceManager = new (_linearAllocator.allocate(sizeof(ResourceManager))) ResourceManager(_linearAllocator);
-    _ResourceManager->init();
+    _ResourceManager->init(_dynamicAllocator);
     _pShaderManager = _ResourceManager->shaderManager;
     _pTextureManager = _ResourceManager->textureManager;
 
+
+    // shader programs
     _pShaderManager->registerShaderProgram("cube_left", "cube", "cube");
     _pShaderManager->registerShaderProgram("cube_right", "cube", "cube");
     
+
+    // shader objects
+    // want to just throw the names of the shaderprograms to register shader
+    std::vector<std::string> shaderProgramNames = {"cube_left", "cube_right"};
+    _pShaderManager->registerShader("cube", shaderProgramNames);
+
+
+    // textures
+    // options for texture
+    int options[4][3] = {
+        {GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT},
+        {GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT},
+        {GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR},
+        {GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST}
+    };
+
+    // Register and bind textures
+    _pTextureManager->registerTextureProgram("usa", FILE_EXTENSION::PNG, options, 4);
+    _pTextureManager->registerTextureProgram("obamna", FILE_EXTENSION::JPG, options, 4);
+
+    Shader* shader_cube = _pShaderManager->shaderMap["cube"];
+    shader::setInt(shader_cube, "texture1", _pTextureManager->texturePrograms["obamna"].textureUnit);
+    shader::setInt(shader_cube, "texture2", _pTextureManager->texturePrograms["usa"].textureUnit); 
 
     // vertices for cube
 float vertices[] = {
@@ -143,34 +169,8 @@ float vertices[] = {
 
 STATE MainApp::run()
 {
-    
-    // TODO: Refactor everything before the main loop. 
 
-    uint left = _pShaderManager->shaderPrograms["cube_left"];
-    uint right = _pShaderManager->shaderPrograms["cube_right"];
-
-
-    // textures
-    // options for texture
-    int options[4][3] = {
-        {GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT},
-        {GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT},
-        {GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR},
-        {GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST}
-    };
-
-    // Register and bind textures
-    _pTextureManager->registerTextureProgram("usa", FILE_EXTENSION::PNG, options, 4);
-    _pTextureManager->registerTextureProgram("obamna", FILE_EXTENSION::JPG, options, 4);
-
-    // Set the texture units in the shaders
-    shader::useShader(left);
-    shader::setInt(left, "texture1", _pTextureManager->texturePrograms["obamna"].textureUnit); 
-    shader::setInt(left, "texture2", _pTextureManager->texturePrograms["usa"].textureUnit); 
-    
-    shader::useShader(right);
-    shader::setInt(right, "texture1", _pTextureManager->texturePrograms["obamna"].textureUnit); 
-    shader::setInt(right, "texture2", _pTextureManager->texturePrograms["usa"].textureUnit); 
+    Shader* shader_cube = _pShaderManager->shaderMap["cube"];
 
     x = 0.0f;
     y = 0.0f;
@@ -217,19 +217,12 @@ STATE MainApp::run()
         // Just drawing the Cube
         glDrawArrays(GL_TRIANGLES, 0, 36); 
 
-        // TODO: Create a Shader struct that contains shader programs. These functions should then be run on Shaders, 
-        //       not the individual shaderprograms
-        shader::setFloat(left, "mixVal", mixVal);        
-        shader::setFloat(right, "mixVal", mixVal);
+        shader::setFloat(shader_cube, "mixVal", mixVal);        
 
         // setting mats for camera
-        shader::setMat4(left, "model", model);
-        shader::setMat4(left, "view", view);
-        shader::setMat4(left, "projection", projection);
-        
-        shader::setMat4(right, "model", model);
-        shader::setMat4(right, "view", view);
-        shader::setMat4(right, "projection", projection);       
+        shader::setMat4(shader_cube, "model", model);
+        shader::setMat4(shader_cube, "view", view);
+        shader::setMat4(shader_cube, "projection", projection);           
 
         glfwSwapBuffers(_mainWindow);
         glfwPollEvents();

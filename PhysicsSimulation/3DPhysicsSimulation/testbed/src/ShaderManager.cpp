@@ -1,6 +1,7 @@
 #include "ShaderManager.hpp"
 
-ShaderManager::ShaderManager()
+ShaderManager::ShaderManager(DynamicAllocator& allocator) 
+    : _allocator(allocator)
 {
 
 }
@@ -26,7 +27,10 @@ void ShaderManager::registerShaderProgram(const char* shaderName)
     uint shaderProgram = glCreateProgram();
     shader::linkShaderProgram(shaderProgram, vertexShader, fragmentShader);
 
-    shaderPrograms[shaderName] = shaderProgram;
+    uint* allocatedMemory = static_cast<uint*>(_allocator.allocate(sizeof(uint)));
+    *allocatedMemory = shaderProgram;
+
+    shaderPrograms[shaderName] = allocatedMemory;
 
     std::cout<<"Shader Registered: "<<shaderName<<std::endl;
 }
@@ -46,8 +50,11 @@ void ShaderManager::registerShaderProgram(const char* shaderName, const char* ve
     // Creating shader programs for linking
     uint shaderProgram = glCreateProgram();
     shader::linkShaderProgram(shaderProgram, vertexShader, fragmentShader);
+    
+    uint* allocatedMemory = static_cast<uint*>(_allocator.allocate(sizeof(uint)));
+    *allocatedMemory = shaderProgram;
 
-    shaderPrograms[shaderName] = shaderProgram;
+    shaderPrograms[shaderName] = allocatedMemory;
 
     std::cout<<"Shader Registered: "<<shaderName<<std::endl;
 
@@ -63,4 +70,44 @@ void ShaderManager::renameShaderProgram(const char* oldName, const char* newName
     shaderPrograms[newName] = shaderPrograms[oldName];
     shaderPrograms.erase(oldName);
     std::cout<<"Shader "<<oldName<<" renamed to "<<newName<<std::endl; 
+}
+
+void ShaderManager::resigterShader(const std::string& shaderName, Shader* shader)
+{
+    auto it = shaderMap.find(shaderName);
+    if (it == shaderMap.end()) {
+        shaderMap[shaderName] = shader;
+    }
+
+}
+
+void ShaderManager::registerShader(const std::string& shaderName, std::vector<uint*> shaderPrograms)
+{
+    auto it = shaderMap.find(shaderName);
+    if (it != shaderMap.end()) return;
+
+    // Create shader using the dynamic allocator
+    Shader* shader = static_cast<Shader*>(_allocator.allocate(sizeof(Shader)));
+    shader->shaderPrograms = shaderPrograms;
+
+    shaderMap[shaderName] = shader;
+}
+
+
+void ShaderManager::registerShader(const std::string& shaderName, std::vector<std::string> shaderProgramNames)
+{
+    auto it = shaderMap.find(shaderName);
+    if (it != shaderMap.end()) return;
+
+    std::vector <uint*> shaderProgramList;
+
+    for (std::string s : shaderProgramNames) {
+        shaderProgramList.push_back(shaderPrograms[s]);
+    }
+    // Allocate memory and construct the Shader 
+    void* shaderMemory = _allocator.allocate(sizeof(Shader));
+    Shader* shader = new (shaderMemory) Shader(std::move(shaderProgramList)); 
+
+
+    shaderMap[shaderName] = shader;    
 }

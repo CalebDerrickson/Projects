@@ -16,7 +16,7 @@ LinearAllocator::LinearAllocator(size_t size)
 {
     _memory = std::malloc(_totalSize);
 
-    std::cout<<"Allocating "<<_totalSize<<" bytes of memory."<<std::endl;
+    std::cout<<"Linear Allocator: Allocating "<<_totalSize<<" bytes of memory."<<std::endl;
 }
 
 LinearAllocator::~LinearAllocator()

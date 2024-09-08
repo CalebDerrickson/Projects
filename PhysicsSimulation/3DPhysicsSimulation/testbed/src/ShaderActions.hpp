@@ -11,6 +11,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "utils.hpp"
+#include "Shader.hpp"
 
 #define RESOURCE_PATH "../testbed/assets/"
 
@@ -29,13 +30,15 @@ namespace shader {
     inline void linkShaderProgram(uint& shaderProgram, uint& vertexShader, uint& fragmentShader);
 
     inline void setAttributePointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void *pointer);
-    inline void useAndDraw(uint, GLenum mode, GLsizei count, GLenum type, const void *indices);
-    inline void useShader(uint shaderProgram);
-    inline void setMat4(uint shaderProgram, const char* name, glm::mat4 val);
-    inline void setBool(uint shaderProgram, const char* name, bool value);
-    inline void setInt(uint shaderProgram, const char* name, int value);
-    inline void setFloat(uint shaderProgram, const char* name, float value);
-    inline void set4Float(uint shaderProgram, const char* name, float v1, float v2, float v3, float v4);
+    
+    // Probably will not work due to indices
+    inline void useAndDraw(Shader* shader, GLenum mode, GLsizei count, GLenum type, const void *indices);
+    inline void useShader(uint* shaderProgram);
+    inline void setMat4(Shader* shader, const char* name, glm::mat4 val);
+    inline void setBool(Shader* shader, const char* name, bool value);
+    inline void setInt(Shader* shader, const char* name, int value);
+    inline void setFloat(Shader* shader, const char* name, float value);
+    inline void set4Float(Shader* shader, const char* name, float v1, float v2, float v3, float v4);
 
     // *******************************
     //      METHOD DEFINITIONS 
@@ -115,44 +118,60 @@ namespace shader {
         glEnableVertexAttribArray(index);
     }
 
-    void useAndDraw(uint shaderProgram, GLenum mode, GLsizei count, GLenum type, const void *indices)
+    void useAndDraw(Shader* shader, GLenum mode, GLsizei count, GLenum type, const void *indices)
     {
-        useShader(shaderProgram);
-        glDrawElements(mode, count, type, indices);
+        for (int i = 0; i < shader->shaderPrograms.size(); i++) {
+            useShader(shader->shaderPrograms[i]);
+            glDrawElements(mode, count, type, indices);    
+        }
     }
 
-    void useShader(uint shaderProgram) 
+    void useShader(uint* shaderProgram) 
     {
         GLint current = 0;
         glGetIntegerv(GL_CURRENT_PROGRAM, &current);
-        if (shaderProgram == current) return;
+        if (*shaderProgram == current) return;
 
-        glUseProgram(shaderProgram);
+        glUseProgram(*shaderProgram);
     }
 
-    void setMat4(uint shaderProgram, const char* name, glm::mat4 val)
+    void setMat4(Shader* shader, const char* name, glm::mat4 val)
     {
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, name), 1, GL_FALSE, glm::value_ptr(val));
+        for (uint* ele : shader->shaderPrograms) {
+            glUniformMatrix4fv(glGetUniformLocation(*ele, name), 1, GL_FALSE, glm::value_ptr(val));
+        }
     }
 
-    void setBool(uint shaderProgram, const char* name, bool value)
+    void setBool(Shader* shader, const char* name, bool value)
     {
-        glUniform1i(glGetUniformLocation(shaderProgram, name), (int)value);
+        for (uint* ele : shader->shaderPrograms)
+        {
+            glUniform1i(glGetUniformLocation(*ele, name), (int)value);
+        }
     }
 
-    void setInt(uint shaderProgram, const char* name, int value)
+    void setInt(Shader* shader, const char* name, int value)
     {
-        glUniform1i(glGetUniformLocation(shaderProgram, name), value);    
+        for (uint* ele : shader->shaderPrograms) {
+            useShader(ele);
+            glUniform1i(glGetUniformLocation(*ele, name), value);    
+        }
     }
 
-    void setFloat(uint shaderProgram, const char* name, float value)
+    void setFloat(Shader* shader, const char* name, float value)
     {
-        glUniform1f(glGetUniformLocation(shaderProgram, name), value);    
+        for (uint* ele : shader->shaderPrograms) {
+            useShader(ele);
+            glUniform1f(glGetUniformLocation(*ele, name), value);
+        }
     }
 
-    void set4Float(uint shaderProgram, const char* name, float v1, float v2, float v3, float v4)
+    void set4Float(Shader* shader, const char* name, float v1, float v2, float v3, float v4)
     {
-        glUniform4f(glGetUniformLocation(shaderProgram, name), v1, v2, v3, v4);
+        for (uint* ele : shader->shaderPrograms) {
+            useShader(ele);
+            glUniform4f(glGetUniformLocation(*ele, name), v1, v2, v3, v4);
+        }
     }
 
 

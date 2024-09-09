@@ -1,7 +1,8 @@
 #include "ShaderManager.hpp"
 
 ShaderManager::ShaderManager(DynamicAllocator& allocator) 
-    : _allocator(allocator)
+    : Manager(), 
+      _allocator(allocator)
 {
 
 }
@@ -14,6 +15,7 @@ ShaderManager::~ShaderManager()
 
 void ShaderManager::registerShaderProgram(const char* shaderName)
 {
+    _logger.logf(LogLevel::DEBUG, "Registering shader program: %s", shaderName);
     std::string shader_path(SHADER_PATH);
     std::string FileName(shaderName);
 
@@ -32,11 +34,12 @@ void ShaderManager::registerShaderProgram(const char* shaderName)
 
     shaderPrograms[shaderName] = allocatedMemory;
 
-    std::cout<<"Shader Registered: "<<shaderName<<std::endl;
+    _logger.logf(LogLevel::DEBUG, "Shaderprogram registered: %s", shaderName);
 }
 
 void ShaderManager::registerShaderProgram(const char* shaderName, const char* vertexName, const char* fragmentName)
 {
+    _logger.logf(LogLevel::DEBUG, "Registering shader program: %s", shaderName);
     std::string resource_path(SHADER_PATH);
     std::string vertexFileName(vertexName);
     std::string fragmentFileName(fragmentName);
@@ -56,49 +59,77 @@ void ShaderManager::registerShaderProgram(const char* shaderName, const char* ve
 
     shaderPrograms[shaderName] = allocatedMemory;
 
-    std::cout<<"Shader Registered: "<<shaderName<<std::endl;
-
+    _logger.logf(LogLevel::DEBUG, "Shaderprogram registered: %s", shaderName);
 }
 
 void ShaderManager::renameShaderProgram(const char* oldName, const char* newName)
 {
-    if (shaderPrograms.find(oldName) == shaderPrograms.end() ||
-        shaderPrograms.find(newName) != shaderPrograms.end()) {
+    _logger.logf(LogLevel::DEBUG, "Renaming shader: %s", oldName);
+    
+    auto it = shaderPrograms.find(oldName);
+    if (it == shaderPrograms.end()) {
+        _logger.logf(LogLevel::ERROR, "shader not found: %s", oldName);
+        return;
+    }
+    it = shaderPrograms.find(newName);
+    if (it != shaderPrograms.end()) {
+        _logger.logf(LogLevel::ERROR, "shader name %s already has a shaderprogram!", newName);
         return;
     }
 
+
+
+
     shaderPrograms[newName] = shaderPrograms[oldName];
     shaderPrograms.erase(oldName);
-    std::cout<<"Shader "<<oldName<<" renamed to "<<newName<<std::endl; 
+    _logger.logf(LogLevel::DEBUG, "Shaderprogram %s renamed to", oldName, newName);
 }
 
 void ShaderManager::resigterShader(const std::string& shaderName, Shader* shader)
 {
+    _logger.logf(LogLevel::DEBUG, "Registering Shader Object: %s", shaderName);
     auto it = shaderMap.find(shaderName);
     if (it == shaderMap.end()) {
         shaderMap[shaderName] = shader;
+        _logger.logf(LogLevel::DEBUG, "Shader Object Registered: %s", shaderName);
     }
 
+    _logger.logf(LogLevel::ERROR, "Shader Object %s is already registered!", shaderName);
 }
 
 void ShaderManager::registerShader(const std::string& shaderName, std::vector<uint*> shaderPrograms)
 {
+    _logger.logf(LogLevel::DEBUG, "Registering Shader Object %s", shaderName);
     auto it = shaderMap.find(shaderName);
-    if (it != shaderMap.end()) return;
+    if (it != shaderMap.end()) {
+        _logger.logf(LogLevel::ERROR, "Shader Object %s is already registered!", shaderName);
+        return;
+    }
 
+    _logger.logf(LogLevel::DEBUG, "Creating shader %s", shaderName);
     // Create shader using the dynamic allocator
     Shader* shader = static_cast<Shader*>(_allocator.allocate(sizeof(Shader)));
     shader->shaderPrograms = shaderPrograms;
 
     shaderMap[shaderName] = shader;
+    _logger.logf(LogLevel::DEBUG, "Shader Object Created and Registered: %s", shaderName);
 }
 
 
 void ShaderManager::registerShader(const std::string& shaderName, std::vector<std::string> shaderProgramNames)
 {
+    _logger.logf(LogLevel::DEBUG, "Registering Shader Object %s", shaderName);
     auto it = shaderMap.find(shaderName);
-    if (it != shaderMap.end()) return;
+    if (it != shaderMap.end()) {
+        _logger.logf(LogLevel::ERROR, "Shader Object %s is already registered!", shaderName);
+        return;
+    }
 
+    std::string listedNames;
+    for (std::string& s : shaderProgramNames ) listedNames += (s + ' ');
+
+    _logger.logf(LogLevel::DEBUG, "Creating shader %s from listed shaderPrograms: ", shaderName);
+    _logger.logf(LogLevel::DEBUG, "\t %s", listedNames);
     std::vector <uint*> shaderProgramList;
 
     for (std::string s : shaderProgramNames) {
@@ -110,4 +141,5 @@ void ShaderManager::registerShader(const std::string& shaderName, std::vector<st
 
 
     shaderMap[shaderName] = shader;    
+    _logger.logf(LogLevel::DEBUG, "Shader Object Created and Registered: %s", shaderName);
 }

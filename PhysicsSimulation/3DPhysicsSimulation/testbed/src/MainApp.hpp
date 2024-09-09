@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseApp.hpp"
 #include "ResourceManager.hpp"
+#include "Logger.hpp"
 #include "memory/LinearAllocator.hpp"
 #include "memory/DynamicAllocator.hpp"
 
@@ -41,5 +42,5 @@ private:
     ShaderManager* _pShaderManager;
     TextureManager* _pTextureManager;
     
-
+    Logger& _logger;
 };

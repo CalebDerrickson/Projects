@@ -5,14 +5,15 @@
 #include <unordered_map>
 #include <vector>
 
-#include "ShaderActions.hpp"
+#include "Actions/ShaderActions.hpp"
 #include "Shader.hpp"
 #include "utils.hpp"
 #include "memory/DynamicAllocator.hpp"
+#include "Logger.hpp"
 
 #define SHADER_PATH "../testbed/assets/shaders/"
 
-class ShaderManager{
+class ShaderManager : public Manager {
 public:
     ShaderManager(DynamicAllocator& allocator);
     ~ShaderManager();

@@ -1,6 +1,6 @@
 #include "MainApp.hpp"
-#include "ShaderActions.hpp"
-#include "TextureActions.hpp"
+#include "Actions/ShaderActions.hpp"
+#include "Actions/TextureActions.hpp"
 
 
 
@@ -18,9 +18,11 @@ void processInput(GLFWwindow* window, MainApp* mainApp);
 MainApp::MainApp(int width, int height, const char* title)
     :   BaseApp(width, height, title),
         _linearAllocator(10* KB),
-        _dynamicAllocator(5* KB)
+        _dynamicAllocator(5* KB),
+        _logger(Logger::getInstance(_linearAllocator, LogLevel::TRACE))
 {
-
+    // Allocators are pivotal to the use of the application, as well as the logger.
+    // As such, these are initialized here.
 }
 
 MainApp::~MainApp()
@@ -31,15 +33,17 @@ MainApp::~MainApp()
 
 STATE MainApp::init()
 {
+    _logger.log(LogLevel::INFO, "Initializing Main application");
+
     // Initialize the basic stuff, like glfw and glad
     // Also initializes _mainWindow
     if (BaseApp::init() == STATE::ERROR) {
-        std::cout<<"Error in initialization"<<std::endl;
+        _logger.log(LogLevel::FATAL, "Error in Base App Initilization!");
         return STATE::ERROR;
     }
 
     const GLubyte* version = glGetString(GL_VERSION);
-    std::cout<<"Using OpenGL version "<< version<<std::endl;
+    _logger.logf(LogLevel::TRACE, "Using OpenGL version %s", version);
 
     glViewport(0, 0, _screenWidth, _screenHeight);
 
@@ -55,8 +59,6 @@ STATE MainApp::init()
     // Enables Depth testing. Also needs to be updated in the main loop
     glEnable(GL_DEPTH_TEST);
 
-    // linear allocator init. Initialize with 10k bytes. 
-    
     
 
     // Resource Manager Init
@@ -157,10 +159,10 @@ float vertices[] = {
     // IO init
     mainJ.update();
     if (mainJ.isPresent()) {
-        std::cout<<mainJ.getName()<<" is present." <<std::endl;
+        _logger.logf(LogLevel::INFO,"Joystick %s is present.", mainJ.getName());
     }
     else {
-        std::cout<<"Joystick not present."<<std::endl;
+        _logger.log(LogLevel::INFO, "Joystick not present");
     }
 
 

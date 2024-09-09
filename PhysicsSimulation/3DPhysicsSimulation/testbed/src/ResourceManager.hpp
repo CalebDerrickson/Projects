@@ -7,8 +7,9 @@
 #include "utils.hpp"
 #include "memory/LinearAllocator.hpp"
 #include "memory/DynamicAllocator.hpp"
+#include "Logger.hpp"
 
-class ResourceManager {
+class ResourceManager : public Manager {
 public:
 
     ResourceManager(LinearAllocator& allocator);

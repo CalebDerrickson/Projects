@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "utils.hpp"
 #include <unordered_map>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -10,7 +9,8 @@
 #include <iostream>
 
 
-
+#include "utils.hpp"
+#include "Logger.hpp"
 
 
 #define TEXTURE_PATH "../testbed/assets/textures/"
@@ -25,7 +25,7 @@ struct textureRef{
 };
 
 
-class TextureManager{
+class TextureManager : public Manager {
 public:
 
     TextureManager();

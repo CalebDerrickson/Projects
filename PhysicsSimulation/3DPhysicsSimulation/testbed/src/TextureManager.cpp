@@ -1,9 +1,10 @@
 #include "TextureManager.hpp"
-#include "TextureActions.hpp"
+#include "Actions/TextureActions.hpp"
 
 #include <stb_image.h>
 
 TextureManager::TextureManager()
+    : Manager()
 {
     nTexturesRegistered = 0;
 
@@ -17,6 +18,7 @@ TextureManager::~TextureManager()
 
 void TextureManager::registerTextureProgram(const std::string& textureName, FILE_EXTENSION fileExtension, int options[][3], int nOptions)
 {
+    _logger.logf(LogLevel::DEBUG, "Registering Texture: %s", textureName);
     // Generate texture
     uint textureId;
     glGenTextures(1, &textureId);
@@ -47,12 +49,12 @@ void TextureManager::registerTextureProgram(const std::string& textureName, FILE
             data = stbi_load((TextureName + ".png").c_str(), &width, &height, &nChannels, 0);
             break;
         default:
-            std::cout << "Unknown File Extension!" << std::endl;
+            _logger.log(LogLevel::ERROR, "Unknown file extension!");
             return;
     }
     
     if (!data) {
-        std::cout << "Texture failed to load!" << std::endl;
+        _logger.log(LogLevel::ERROR, "Texture failed to load!");
         return;
     }
 
@@ -64,30 +66,47 @@ void TextureManager::registerTextureProgram(const std::string& textureName, FILE
     
     // Store texture ID and texture unit
     texturePrograms[textureName.c_str()] = textureRef(textureId, nTexturesRegistered);
-    std::cout << "Texture registered: " << textureName <<std::endl;
-    // for debugging
-    // ' '<<textureId<<' '<<nTexturesRegistered<<std::endl;
-    // std::cout << "Address of textureRef for " << textureName << ": " << &texturePrograms[textureName.c_str()] << std::endl;
+    
+    _logger.logf(LogLevel::DEBUG, "Texture Registered: %s", textureName);
+    _logger.logf(LogLevel::TRACE, "TextureId: %llu.", textureId);
+    _logger.logf(LogLevel::TRACE, "Texture Location: %p", &texturePrograms[textureName.c_str()]);
     nTexturesRegistered++;
+    _logger.logf(LogLevel::TRACE, "Number of Registered Textures: %llu", nTexturesRegistered);
 }
 
 
 void TextureManager::renameTextureProgram(const char* oldName, const char* newName)
 {
+    _logger.logf(LogLevel::DEBUG, "Renaming texture: %s", oldName);
+    
+    auto it = texturePrograms.find(oldName);
+    if (it == texturePrograms.end()) {
+        _logger.logf(LogLevel::ERROR, "Texture not found: %s", oldName);
+        return;
+    }
+    it = texturePrograms.find(newName);
+    if (it != texturePrograms.end()) {
+        _logger.logf(LogLevel::ERROR, "Texture name %s already has a texture!", newName);
+        return;
+    }
+
+
     textureRef ref = texturePrograms[oldName];
     texturePrograms.erase(oldName);
     texturePrograms[newName] = ref;
+    _logger.logf(LogLevel::DEBUG, "Texture %s renamed to", oldName, newName);
+    
 }
 
 
 void TextureManager::useTexture(const std::string& textureName) {
     auto it = texturePrograms.find(textureName);
     if (it == texturePrograms.end()) {
-        std::cout << "Texture " << textureName << " not found!" << std::endl;
+        _logger.logf(LogLevel::WARN, "Texture %s not found! Cannot be used.", textureName);
         return;
     }
 
     glActiveTexture(GL_TEXTURE0 + it->second.textureUnit);
     glBindTexture(GL_TEXTURE_2D, it->second.textureId);
-
+    // _logger.logf(LogLevel::TRACE, "Using texture: %llu", it->second.textureUnit);
 }

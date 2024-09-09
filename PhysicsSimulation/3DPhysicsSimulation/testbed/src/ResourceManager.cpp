@@ -1,5 +1,5 @@
 #include "ResourceManager.hpp"
-#include "ShaderActions.hpp"
+#include "Actions/ShaderActions.hpp"
 
 // *******************************
 //    PRIVATE METHOD DECLARATIONS 
@@ -11,7 +11,8 @@
 // *******************************
 
 ResourceManager::ResourceManager(LinearAllocator& allocator) 
-    : _linearAllocator(allocator),
+    : Manager(), 
+      _linearAllocator(allocator),
       shaderManager(nullptr),
       textureManager(nullptr)
 {
@@ -25,15 +26,18 @@ ResourceManager::~ResourceManager()
 
 void ResourceManager::init(DynamicAllocator& allocator)
 {
+    _logger.log(LogLevel::INFO, "Initializing ResourceManager.");
     glGenBuffers(1, &VBO);
     glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &EBO);  
     shaderManager = new (_linearAllocator.allocate(sizeof(ShaderManager))) ShaderManager(allocator);
     textureManager = new (_linearAllocator.allocate(sizeof(TextureManager))) TextureManager();
+    _logger.log(LogLevel::DEBUG, "Initialized ResourceManager.");
 }
 
 void ResourceManager::shutdown()
 {
+    _logger.log(LogLevel::DEBUG, "Shutting Down ResourceManager.");
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
